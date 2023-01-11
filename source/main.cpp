@@ -688,8 +688,29 @@ void handleChatRendering(int64_t a1, float a2, float a3, float a4,
 
 void handleSaveMenuRender(int param_1, int param_2, int param_3, uint param_4, int8_t *param_5,
                           uint param_6, int param_7, uint param_8, uint param_9) {
-    if (param_4 == 0x164 && param_7 == 0x808080) return;
-    else if ((param_2 == 0xD2 || param_2 == 0xD3) && param_4 == 0x1C8 && param_7 == 0x5C3AB4 && param_8 == 0x14) {
+    if (param_4 == 0x164 && param_8 == 0x15) {
+        if (param_7 == 0x808080) return;
+        if (param_3 == 0x96 || param_3 == 0x117 || param_3 == 0x198 || param_3 == 0x21A) {
+            char year[8];
+            char month[4];
+            char day[4];
+            char date[20];
+            auto sc3 = (char*)param_5;
+            memcpy(year, sc3, 8);
+            sc3 += 10;
+            if (*(sc3 + 1) == 0x3F) *(sc3 + 1) = 0x01;
+            memcpy(month, sc3, 4);
+            sc3 += 6;
+            if (*(sc3 + 1) == 0x3F) *(sc3 + 1) = 0x01;
+            memcpy(day, sc3, 4);
+            memcpy(date, month, 4);
+            date[4] = 0x80; date[5] = 0x40;
+            memcpy(date + 6, day, 4);
+            date[10] = 0x80; date[11] = 0x40;
+            memcpy(date + 12, year, 8);
+            memcpy(param_5, date, 20);
+        }
+    } else if ((param_2 == 0xD2 || param_2 == 0xD3) && param_4 == 0x1C8 && param_7 == 0x5C3AB4 && param_8 == 0x14) {
         param_2 += 8;
     } else if ((param_2 == 0x29C || param_2 == 0x29D) && param_4 == 0x134 && param_7 == 0x5C3AB4 && param_8 == 0x14) {
         param_2 += 8;
