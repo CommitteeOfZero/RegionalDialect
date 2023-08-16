@@ -7,8 +7,9 @@
 #include "skyline/utils/ipc.hpp"
 #include "skyline/utils/utils.h"
 
-#include "FindPattern.h"
 #include "LanguageBarrierStructs.h"
+#include "Config.h"
+#include "SigScan.h"
 
 // For handling exceptions
 char ALIGNA(0x1000) exception_handler_stack[0x4000];
@@ -269,8 +270,6 @@ void handleTipsDataInit(ulong thread, ushort *addr1, ushort *addr2) {
     // Running hooked function to populate EPmax
     TipsDataInitImpl(thread, addr1, addr2);
 
-    const char *SystemMenuDispPattern = "EA0F1CFCE923016DFD7B02A9FD830091F44f03A9F31A00F0";
-
     // cmp and mov instructions with register and immediate value fields zeroed out
     uint32_t cmpiTemplate = 0x7100001F;
     uint32_t moviTemplate = 0x52800000;
@@ -279,27 +278,21 @@ void handleTipsDataInit(ulong thread, ushort *addr1, ushort *addr2) {
     EPmax = get_u32(EPmaxPtr);
     skyline::logger::s_Instance->LogFormat("EPmax: %d", EPmax);
 
-    uintptr_t SystemMenuDispAddr = FindPattern(
-        (unsigned char*)skyline::utils::g_MainTextAddr,
-        (unsigned char*)skyline::utils::g_MainRodataAddr,
-        SystemMenuDispPattern,
-        skyline::utils::g_MainTextAddr,
-        0,
-        0);
+    uintptr_t SystemMenuDispAddr = sigScan("game", "SystemMenuDisp");
 
     // Get address of first comparison to patch
     uintptr_t patchInCmp1Addr = SystemMenuDispAddr - 0x1530;
 
     // Patching the comparison with the actual EPmax instead of hardcoded value
     // EPmax - 5 because of repeated TIPs
-    overwrite_u32(patchInCmp1Addr,      cmpiTemplate | (EPmax - 5 << 10) | (0x9 << 5));
-    overwrite_u32(patchInCmp1Addr + 4,  moviTemplate | (EPmax - 5 << 5)  | 0x8);
+    overwrite_u32(patchInCmp1Addr,      cmpiTemplate | ((EPmax - 5) << 10) | (0x9 << 5));
+    overwrite_u32(patchInCmp1Addr + 4,  moviTemplate | ((EPmax - 5) << 5)  | 0x8);
 
     // Same for the second comparison, although with different order and registers
     uintptr_t patchInCmp2Addr = patchInCmp1Addr + 0x300;
         
-    overwrite_u32(patchInCmp2Addr,      moviTemplate | (EPmax - 5 << 5)  | 0x9);
-    overwrite_u32(patchInCmp2Addr + 8,  cmpiTemplate | (EPmax - 5 << 10) | (0x8 << 5));
+    overwrite_u32(patchInCmp2Addr,      moviTemplate | ((EPmax - 5) << 5)  | 0x9);
+    overwrite_u32(patchInCmp2Addr + 8,  cmpiTemplate | ((EPmax - 5) << 10) | (0x8 << 5));
 
     overwrite_trampoline(
         englishTipsShowBranch1 - 0x4,
@@ -843,30 +836,17 @@ void skyline_main() {
         ourTable[i] = 32;
 
     uintptr_t code = skyline::utils::g_MainTextAddr;
-    const char *GSLfontStretchFPattern =                    "FF0301D1FD7B03A9FDC30091295C00120AE0BF";
-    const char *GSLfontStretchWithMaskFPattern =            "FF0303D1FD7B09A9FD430291F55300F9F4";
-    const char *GSLfontStretchWithMaskExFPattern =          "FF0303D1FD7B09A9FD430291F55300F9F44F0BA9B03B40BDA61F";
     const char *fontAlinePattern =                          "20111111";
     const char *audioLoweringPattern =                      "187F0153";
     const std::vector<const char *> widthCheckPatterns =    {"1F790571", "3F790571", "3F7D0571", "5F790571", "7F790571", "7F3D0671", "BF3D0671", "7F7D0571", "5F3D0671"};
-    // const char *TipsInitPattern =                           "FD7BBAA9FC6F01A9FD030091FA6702A9F85F03A9F65704A9F44F05A9FF3B40D1FF833CD1";
-    const char *TipsDataInitPattern =                       "FD7BBAA9FC6F01A9FD030091FA6702A9F85F03A9F65704A9F44F05A9FF3B40D1FFC329";
-    // const char *MESsetNGflagPattern =                       "F85FBDA9F65701A9F44F02A9881A00B0087546F908";
-    const char *MESsetNGflagPattern =                       "F85FBDA9F65701A9F44F02A9881A00D008C546F908";
-    const char *ChatLayoutPattern =                         "FF4307D1FD7B17A9FDC30591FC6F18A9FA6719A9F85F1AA9F6571BA9F44F1CA92B";
-    // const char *calMainPattern =                          "FF4302D1FD7B03A9FDC30091FC6F04A9FA6705A9F85F06A9F65707A9F44F08A9771B00D0F7";
-    const char *calMainPattern =                            "FF4302D1FD7B03A9FDC30091FC6F04A9FA6705A9F85F06A9F65707A9F44F08A9771B00F0F7";
-    const char *Noah_8DPattern =                            "FD7BBEA9F30B00F9FD030091206281522100805233008052????????081C00B0084D47F9080140F909AC8D520801098B090140B9290500113F8100";
-    const char *MESsetTvramPattern =                        "FD7BBAA9FC6F01A9FA6702A9F85F03A9F65704A9F44F05A9A81A00B008C546";
-    const char *ChatRenderingPattern =                      "EF3BB66DED33016DEB2B026DE923036DFD7B04A9FD030191FC6F05A9FA6706A9F85F07A9F65708A9F44F09A9FF0740D1FF0306";
-    const char *MESdrawTextExFPattern =                     "E80F19FCFD7B01A9FD430091FC6F02A9FA6703A9F85F04A9F65705A9F44F06A9FF0740D1";
-    const char *GSLflatRectFPattern =                       "FF4301D1FD7B03A9FDC30091F44F04A94820";
     const char *SaveMenuGuidePattern =                      "010000001027";
 
-    uintptr_t MESsetNGflagAddr = FindPattern((unsigned char*)code, (unsigned char*)skyline::utils::g_MainRodataAddr, MESsetNGflagPattern, code, 0, 0);
-    uintptr_t Noah_8DAddr = FindPattern((unsigned char*)code, (unsigned char*)skyline::utils::g_MainRodataAddr, Noah_8DPattern, code, 0, 0);
-    uintptr_t MESsetTvramAddr = FindPattern((unsigned char*)code, (unsigned char*)skyline::utils::g_MainRodataAddr, MESsetTvramPattern, code, 0, 0);
-    uintptr_t TipsDataInitAddr = FindPattern((unsigned char*)code, (unsigned char *)skyline::utils::g_MainRodataAddr, TipsDataInitPattern, code, 0, 0);
+    skyline::logger::s_Instance->Log("Before configInit\n");
+    configInit();
+    skyline::logger::s_Instance->Log("After configInit\n");
+
+    uintptr_t MESsetNGflagAddr = sigScan("game", "MESsetNGflag");
+    uintptr_t TipsDataInitAddr = sigScan("game", "TipsDataInit");
 
     codeCaves = skyline::utils::g_MainRodataAddr - 0xC30;
     englishTipsHideBranch1 = code + 0x248a8;
@@ -874,16 +854,16 @@ void skyline_main() {
     englishTipsHideBranch2 = code + 0x2499c;
     englishTipsShowBranch2 = code + 0x249b4;
 
-    MEStextDatNumPtr = retrievePointer(MESsetNGflagAddr + 28, -0xC);
-    MESngFontListTopNumPtr = retrievePointer(MESsetNGflagAddr + 28, 0x8);
-    MESngFontListLastNumPtr = retrievePointer(MESsetNGflagAddr + 32, 0x8);
-    MEStextFlPtr = retrievePointer(MESsetNGflagAddr + 48, 0xC);
-    MEStextPtr = retrievePointer(MESsetNGflagAddr + 52, 0x10);
-    MESngFontListLastPtr = retrievePointer (MESsetNGflagAddr + 56, 0x20);
-    MESngFontListTopPtr = retrievePointer(MESsetNGflagAddr + 64, 0x24);
-    ScrWorkPtr = retrievePointer(Noah_8DAddr + 28);
-    MesFontColorPtr = retrievePointer(MESsetTvramAddr + 84, 0x18);
-    EPmaxPtr = retrievePointer(TipsDataInitAddr + 0x154);
+    MEStextDatNumPtr = retrievePointer(sigScan("game", "MEStextDatNumPtr"), -0xC);
+    MESngFontListTopNumPtr = retrievePointer(sigScan("game", "MESngFontListTopNumPtr"), 0x8);
+    MESngFontListLastNumPtr = retrievePointer(sigScan("game", "MESngFontListLastNumPtr"), 0x8);
+    MEStextFlPtr = retrievePointer(sigScan("game", "MEStextFlPtr"), 0xC);
+    MEStextPtr = retrievePointer(sigScan("game", "MEStextPtr"), 0x10);
+    MESngFontListLastPtr = retrievePointer(sigScan("game", "MESngFontListLastPtr"), 0x20);
+    MESngFontListTopPtr = retrievePointer(sigScan("game", "MESngFontListTopPtr"), 0x24);
+    ScrWorkPtr = retrievePointer(sigScan("game", "ScrWorkPtr"));
+    MesFontColorPtr = retrievePointer(sigScan("game", "MesFontColorPtr"), 0x18);
+    EPmaxPtr = retrievePointer(sigScan("game", "EPmaxPtr"));
 
     uintptr_t fontAlineAddr = FindPattern((unsigned char*)skyline::utils::g_MainDataAddr, (unsigned char*)skyline::utils::g_MainBssAddr, fontAlinePattern, skyline::utils::g_MainDataAddr, 0, 0);
     char fontAlineAddrStr[9];
@@ -942,24 +922,27 @@ void skyline_main() {
     overwrite_u32(audioLoweringAddr,     nop);
     overwrite_u32(audioLoweringAddr + 4, nop);
 
+    // Skip fix
     overwrite_u32(code + 0x437a8, 0x17FFFFB9);
+
+    // DoZ selection
     overwrite_u32(code + 0x2bc88, 0x17FFFF39);
     overwrite_u32(code + 0x2baac, 0x17FFFFB0);
 
     A64HookFunction(
-        reinterpret_cast<void*>(FindPattern((unsigned char*)code, (unsigned char *)skyline::utils::g_MainRodataAddr, GSLfontStretchFPattern, code, 0, 0)),
+        reinterpret_cast<void*>(sigScan("game", "GSLfontStretchF")),
         reinterpret_cast<void*>(handleGSLfontStretchF),
         (void **)&GSLfontStretchFImpl
     );
 
     A64HookFunction(
-        reinterpret_cast<void*>(FindPattern((unsigned char*)code, (unsigned char *)skyline::utils::g_MainRodataAddr, GSLfontStretchWithMaskFPattern, code, 0, 0)),
+        reinterpret_cast<void*>(sigScan("game", "GSLfontStretchWithMaskF")),
         reinterpret_cast<void*>(handleGSLfontStretchWithMaskF),
         (void **)&GSLfontStretchWithMaskFImpl
     );
 
     A64HookFunction(
-        reinterpret_cast<void*>(FindPattern((unsigned char*)code, (unsigned char *)skyline::utils::g_MainRodataAddr, GSLfontStretchWithMaskExFPattern, code, 0, 0)),
+        reinterpret_cast<void*>(sigScan("game", "GSLfontStretchWithMaskExF")),
         reinterpret_cast<void*>(handleGSLfontStretchWithMaskExF),
         (void **)&GSLfontStretchWithMaskExFImpl
     );
@@ -977,31 +960,31 @@ void skyline_main() {
     );
 
     A64HookFunction(
-        reinterpret_cast<void*>(FindPattern((unsigned char*)code, (unsigned char *)skyline::utils::g_MainRodataAddr, ChatLayoutPattern, code, 0, 0)),
+        reinterpret_cast<void*>(sigScan("game", "ChatLayout")),
         reinterpret_cast<void*>(handleChatLayout),
         (void **)&ChatLayoutImpl
     );
 
     A64HookFunction(
-        reinterpret_cast<void*>(FindPattern((unsigned char*)code, (unsigned char*)skyline::utils::g_MainRodataAddr, calMainPattern, code, 0, 0)),
+        reinterpret_cast<void*>(sigScan("game", "calMain")),
         reinterpret_cast<void*>(handlecalMain),
         (void **)&calMainImpl
     );
 
     A64HookFunction(
-        reinterpret_cast<void*>(FindPattern((unsigned char*)code, (unsigned char*)skyline::utils::g_MainRodataAddr, ChatRenderingPattern, code, 0, 0)),
+        reinterpret_cast<void*>(sigScan("game", "ChatRendering")),
         reinterpret_cast<void*>(handleChatRendering),
         (void **)&ChatRenderingImpl
     );
 
     A64HookFunction(
-        reinterpret_cast<void*>(FindPattern((unsigned char*)code, (unsigned char*)skyline::utils::g_MainRodataAddr, MESdrawTextExFPattern, code, 0, 0)),
+        reinterpret_cast<void*>(sigScan("game", "MESdrawTextExF")),
         reinterpret_cast<void*>(handleMESdrawTextExF),
         (void **)&MESdrawTextExFImpl
     );
 
     A64HookFunction(
-        reinterpret_cast<void*>(FindPattern((unsigned char*)code, (unsigned char*)skyline::utils::g_MainRodataAddr, GSLflatRectFPattern, code, 0, 0)),
+        reinterpret_cast<void*>(sigScan("game", "GSLflatRectF")),
         reinterpret_cast<void*>(handleGSLflatRectF),
         (void **)&GSLflatRectFImpl
     );

@@ -1,8 +1,19 @@
 #include <string>
 #include <iomanip>
 #include <algorithm>
+#include <vector>
+#include <sstream>
 
-#include "FindPattern.h"
+#include "skyline/utils/cpputils.hpp"
+#include "skyline/logger/TcpLogger.hpp"
+#include "skyline/logger/StdoutLogger.hpp"
+
+#include "json.hpp"
+using json = nlohmann::json;
+
+#include "SigScan.h"
+#include "SigExpr.h"
+#include "Config.h"
 
 using namespace std;
 
@@ -113,4 +124,48 @@ uintptr_t FindPattern(const unsigned char* dataStart,
   }
 
   return NULL;
+}
+
+uintptr_t sigScanRaw(const char *category, const char* sigName) {
+
+  std::stringstream logstr;
+  logstr << "SigScan: looking for " << category << "/" << sigName << "... "
+         << std::endl;
+
+  json sig = config["gamedef"]["signatures"][category][sigName];
+  std::string sPattern = sig["pattern"].get<std::string>();
+  const char* pattern = sPattern.c_str();
+  size_t offset = sig["offset"].get<size_t>();
+
+  logstr << sPattern << std::endl;
+
+  uintptr_t baseAddress = skyline::utils::g_MainTextAddr;
+  uintptr_t endAddress = skyline::utils::g_MainRodataAddr;
+  uintptr_t retval = FindPattern((unsigned char *)baseAddress,
+                                 (unsigned char*)endAddress,
+                                 pattern, baseAddress,offset,
+                                 sig["occurrence"].get<int>());
+
+  if (retval != NULL) {
+      // logstr << " found at 0x" << std::hex << retval;
+      // skyline::logger::s_Instance->Log(logstr.str().c_str());
+      return retval;
+  }
+
+  // logstr << " not found!";
+  // skyline::logger::s_Instance->LogFormat("%s", logstr.str().c_str());
+  return NULL;
+}
+
+
+uintptr_t sigScan(const char* category, const char* sigName) {
+  if (config["gamedef"]["signatures"][category].count(sigName) == 0){
+    return NULL;
+  }
+
+  uintptr_t raw = sigScanRaw(category, sigName);
+  json sig = config["gamedef"]["signatures"][category][sigName];
+  if (sig.count("expr") == 0) return raw;
+  if (raw == 0) return raw;
+  return SigExpr(sig["expr"].get<std::string>(), raw).evaluate();
 }
