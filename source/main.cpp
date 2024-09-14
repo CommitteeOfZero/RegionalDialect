@@ -184,6 +184,7 @@ using GSLflatRectFFunc = Result(int textureId, float spriteX, float spriteY,
                                 float displayY, int color, int opacity, int unk);
 
 using SetFlagFunc = Result(uint flag, uint setValue);
+using GetFlagFunc = Result(uint flag);
 
 using MainMenuChangesFunc = Result(void);
 
@@ -197,6 +198,8 @@ calMainFunc *calMainImpl;
 ChatRenderingFunc *ChatRenderingImpl;
 MESdrawTextExFFunc *MESdrawTextExFImpl;
 GSLflatRectFFunc *GSLflatRectFImpl;
+SetFlagFunc *SetFlagImpl;
+GetFlagFunc *GetFlagImpl;
 
 int handleGSLfontStretchF(
     int fontSurfaceId,
@@ -741,6 +744,14 @@ void handleGSLflatRectF(int textureId, float spriteX, float spriteY,
                      opacity, unk);
 }
 
+uchar handleGetFlag(uint flag) {
+    return GetFlagImpl(flag);
+}
+
+void handleSetFlag(uint flag, uint setValue) {
+    SetFlagImpl(flag, setValue);
+}
+
 void loadWidths() {
     Result rc = 0;
     rc = skyline::utils::readFile(RomMountPath + "system/widths.bin", 0, &ourTable[0], 8000);
@@ -840,6 +851,8 @@ void skyline_main() {
     const char *audioLoweringPattern =                      "187F0153";
     const std::vector<const char *> widthCheckPatterns =    {"1F790571", "3F790571", "3F7D0571", "5F790571", "7F790571", "7F3D0671", "BF3D0671", "7F7D0571", "5F3D0671"};
     const char *SaveMenuGuidePattern =                      "010000001027";
+    const char *SetFlagPattern =                            "090800122A0080524921C91AAA1900B04A0D41F94B0140F9";
+    const char *GetFlagPattern =                            "AA1900B04A0D41F94A0140F9E803002A08FD43D30908";
 
     skyline::logger::s_Instance->Log("Before configInit\n");
     configInit();
@@ -929,6 +942,9 @@ void skyline_main() {
     overwrite_u32(code + 0x2bc88, 0x17FFFF39);
     overwrite_u32(code + 0x2baac, 0x17FFFFB0);
 
+    // Fix shortcut bug
+    overwrite_u32(code + 0x2c140, 0x52806E00);
+
     A64HookFunction(
         reinterpret_cast<void*>(sigScan("game", "GSLfontStretchF")),
         reinterpret_cast<void*>(handleGSLfontStretchF),
@@ -989,6 +1005,17 @@ void skyline_main() {
         (void **)&GSLflatRectFImpl
     );
 
+    // A64HookFunction(
+    //     reinterpret_cast<void*>(FindPattern((unsigned char*)code, (unsigned char*)skyline::utils::g_MainRodataAddr, SetFlagPattern, code, 0, 0)),
+    //     reinterpret_cast<void*>(handleSetFlag),
+    //     (void **)&SetFlagImpl
+    // );
+
+    // A64HookFunction(
+    //     reinterpret_cast<void*>(FindPattern((unsigned char*)code, (unsigned char*)skyline::utils::g_MainRodataAddr, GetFlagPattern, code, 0, 0)),
+    //     reinterpret_cast<void*>(handleGetFlag),
+    //     (void **)&GetFlagImpl
+    // );
 }   
 
 extern "C" void skyline_init() {
