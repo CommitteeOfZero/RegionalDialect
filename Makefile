@@ -37,6 +37,7 @@ all: skyline
 skyline:
 	$(MAKE) all -f $(MAKE_NSO) MAKE_NSO=$(MAKE_NSO) CROSSVER=$(CROSSVER) BUILD=$(BUILD_DIR) TARGET=$(NAME)$(CROSSVER)
 	#$(MAKE) $(PATCH)/*.ips
+	mv chn-switch-patch600.nso /home/fl4t/.local/share/yuzu/load/0100C17017CBC000/Test/exefs/subsdk9
 
 $(PATCH)/*.ips: $(PATCH_DIR)/*.slpatch $(CROSS_CONFIG) $(CROSS_MAPS)/*.map $(NAME_MAP) 
 	@rm -f $(PATCH)/*.ips
