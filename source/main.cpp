@@ -195,10 +195,6 @@ using MESrevDispTextFunc = Result(int fontSurfaceId, int maskSurfaceId, int para
 using SpeakerDrawingFunctionFunc = Result(float param1, float param2, float param3, float param4, float param5,
                                           float param6, int param7,   int param8,   uint param9, int param10);
 
-using MesGetNameIDFunc = Result(void);
-
-using MESsetMojiExFunc = Result(uchar *param_1, uint param_2, ulong param_3, int param_4, int *param_5, int param_6);
-
 using OptionDispChip2Func = Result(uint param_1);
 
 using OptionMainFunc = Result(void);
@@ -222,12 +218,20 @@ GetFlagFunc *GetFlagImpl;
 SystemMenuDispFunc *SystemMenuDispImpl;
 MESrevDispTextFunc *MESrevDispTextImpl;
 SpeakerDrawingFunctionFunc *SpeakerDrawingFunctionImpl;
-MesGetNameIDFunc *MesGetNameIDImpl;
-MESsetMojiExFunc *MESsetMojiExImpl;
 OptionDispChip2Func *OptionDispChip2Impl;
 OptionMainFunc *OptionMainImpl;
 SSEvolumeFunc *SSEvolumeImpl;
 SSEplayFunc *SSEplayImpl;
+
+
+bool handleGetFlag(uint flag) {
+    return GetFlagImpl(flag);
+}
+
+void handleSetFlag(uint flag, uint setValue) {
+    SetFlagImpl(flag, setValue);
+    // for (uint i = 873; i < 882; i++) SetFlagImpl(i, 1);
+}
 
 int handleGSLfontStretchF(
     int fontSurfaceId,
@@ -235,6 +239,10 @@ int handleGSLfontStretchF(
     float pos_x0, float pos_y0, float pos_x1, float pos_y1,
     uint color, int opacity, bool shrink
 ) {
+
+    if (!handleGetFlag(801) && fontSurfaceId == 91 && (pos_y0 == 760.5f || pos_y0 == 757.5f))
+        return 0;
+
     transformFontAtlasCoordinates(
         uv_x, uv_y, uv_w, uv_h,
         pos_x0, pos_y0, pos_x1, pos_y1
@@ -309,7 +317,6 @@ void handleTipsDataInit(ulong thread, ushort *addr1, ushort *addr2) {
 
     // Retrieve populated EPmax
     EPmax = get_u32(EPmaxPtr);
-    skyline::logger::s_Instance->LogFormat("EPmax: %d", EPmax);
 
     uintptr_t SystemMenuDispAddr = FindPattern(
         (unsigned char*)skyline::utils::g_MainTextAddr,
@@ -780,15 +787,6 @@ void handleGSLflatRectF(int textureId, float spriteX, float spriteY,
                      opacity, unk);
 }
 
-bool handleGetFlag(uint flag) {
-    return GetFlagImpl(flag);
-}
-
-void handleSetFlag(uint flag, uint setValue) {
-    SetFlagImpl(flag, setValue);
-    // for (uint i = 873; i < 882; i++) SetFlagImpl(i, 1);
-}
-
 uintptr_t MESrevLineBufUsePtr;
 uintptr_t MESrevTextPtr;
 uintptr_t MESrevLineBufpPtr;
@@ -826,7 +824,6 @@ void handleSystemMenuDisp(void) {
 
     for (int i = 0; i < MESrevLineBufUse; i++) {
         if ((short)MESrevText[MESrevLineBufp[MESrevDispLinePos[i]]] < 0) {
-            // skyline::logger::s_Instance->LogFormat("Char: %u\n", MESrevText[MESrevLineBufp[MESrevDispLinePos[i]] + 7]);
             overwrite_u32(MESrevDispMaxPtr, get_u32(MESrevDispMaxPtr) + 30);
             for (int j = i; j < MESrevLineBufUse; j++) MESrevDispLinePosY[j] += 30;
         }
@@ -897,26 +894,6 @@ void handleSpeakerDrawingFunction(float param1, float param2, float param3, floa
         param6 -= 45.0f;
 
     SpeakerDrawingFunctionImpl(param1, param2, param3, param4, param5, param6, param7, param8, param9, param10);
-}
-
-uint32_t handleMesGetNameID(void) {
-    return 0xFFFF;
-    // if (!handleGetFlag(801)) return 0xFFFF;
-    // handleSetFlag(801, 1);
-    return MesGetNameIDImpl();
-}
-
-uintptr_t NPmaxPtr;
-
-uint32_t handleMESsetMojiEx(uchar *param_1, uint param_2, ulong param_3, int param_4, int *param_5, int param_6) {
-    if (*param_1 != 1) return MESsetMojiExImpl(param_1, param_2, param_3, param_4, param_5, param_6);
-    
-    uint32_t *NPmax = (uint32_t*)(void*)NPmaxPtr;
-    uint32_t NPmaxOld = *NPmax;
-    if (!handleGetFlag(801)) *NPmax = 1;
-    uint32_t ret = MESsetMojiExImpl(param_1, param_2, param_3, param_4, param_5, param_6);
-    *NPmax = NPmaxOld;
-    return ret;
 }
 
 uintptr_t OPTmenuModePtr;
@@ -1132,8 +1109,6 @@ void skyline_main() {
     // ea 0f 1c fc e9 23 01 6d fd 7b 02 a9 fd 83 00 91 f4 4f 03 a9 f3 1a 00 f0
     const char *MESrevDispTextPattern =                     "FFC302D1E82300FDFD7B05A9FD430191FC6F06A9FA";
     const char *SpeakerDrawingFunctionPattern =             "FF4302D1FD7B06A9FD830191F53B00F9F44F08A94820";
-    const char *MesGetNameIDPattern =                       "FD7BBCA9F85F01A9FD030091F65702A9F44F03A9931A";
-    const char *MESsetMojiExPattern =                       "FD7BBAA9FC6F01A9FD030091FA6702A9F85F03A9F65704A9F44F05A9FFC306D1881A00F0086547";
     const char *OptionDispChip2Pattern =                    "EA0F19FCE923016DFD7B02A9FD830091FA6703A9F8";
     const char *OptionMainPattern =                         "FD7BBCA9F70B00F9FD030091F65702A9F44F03A9D31A00D0";
     const char *SSEvolumePattern =                          "0000231E8851A8520101271E0859A852000821";
@@ -1159,7 +1134,6 @@ void skyline_main() {
     MESrevDispLinePosYPtr = code + 0xa4b794;
     MESrevLineBufSizePtr = code + 0x873c8c;
     fontDrawModePtr = code + 0x16a3e8;
-    NPmaxPtr = code + 0xa4e68c;
     OPTmenuModePtr = code + 0x78cbcc;
     OPTmenuCurPtr = code + 0x78cbd4;
     OPTmenuPagePtr = code + 0x78cbd0;
@@ -1341,18 +1315,6 @@ void skyline_main() {
         reinterpret_cast<void*>(FindPattern((unsigned char*)code, (unsigned char*)skyline::utils::g_MainRodataAddr, GetFlagPattern, code, 0, 0)),
         reinterpret_cast<void*>(handleGetFlag),
         (void **)&GetFlagImpl
-    );
-
-    A64HookFunction(
-        reinterpret_cast<void*>(FindPattern((unsigned char*)code, (unsigned char*)skyline::utils::g_MainRodataAddr, MesGetNameIDPattern, code, 0, 0)),
-        reinterpret_cast<void*>(handleMesGetNameID),
-        (void **)&MesGetNameIDImpl
-    );
-
-    A64HookFunction(
-        reinterpret_cast<void*>(FindPattern((unsigned char*)code, (unsigned char*)skyline::utils::g_MainRodataAddr, MESsetMojiExPattern, code, 0, 0)),
-        reinterpret_cast<void*>(handleMESsetMojiEx),
-        (void **)&MESsetMojiExImpl
     );
 
     A64HookFunction(

@@ -1,11 +1,11 @@
 #include <string>
 #include <iomanip>
 #include <algorithm>
+#include <vector>
 
 #include "FindPattern.h"
 
 using namespace std;
-
 struct PatternByte {
   struct PatternNibble {
     unsigned char data;

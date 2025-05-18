@@ -1,7 +1,7 @@
 #ifndef _FINDPATTERN_H
 #define _FINDPATTERN_H
 
-#include <vector>
+#include <stdint.h>
 
 /**
 * @brief Scans a given chunk of data for a given pattern.
