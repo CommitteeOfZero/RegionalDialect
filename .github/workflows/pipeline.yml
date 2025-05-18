@@ -20,11 +20,15 @@ jobs:
       - name: Build the project
         run: make
 
+      - name: Rename output
+        run: |
+          mv chn-switch-patch600.nso subsdk9
+
       - name: Create Github Artifact
         uses: actions/upload-artifact@v4.1.0
         with:
-          name: chn-switch-patch600.nso
-          path: chn-switch-patch600.nso
+          name: subsdk9
+          path: subsdk9
 
       - name: Get Next Version
         id: semver
@@ -41,7 +45,7 @@ jobs:
         if: github.event_name == 'push' && ((startsWith(github.ref, 'refs/tags') || github.ref_name == 'master'))
         with:
           files: |
-            chn-switch-patch600.nso
+            subsdk9
           tag_name: ${{ steps.semver.outputs.next }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
