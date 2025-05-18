@@ -39,6 +39,8 @@ jobs:
           branch: master
           fallbackTag: 0.0.0
           patchAll: true
+          noVersionBumpBehavior: patch
+          noNewCommitBehavior: warn
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
