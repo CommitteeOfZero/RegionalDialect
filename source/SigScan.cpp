@@ -8,15 +8,11 @@
 #include "skyline/logger/TcpLogger.hpp"
 #include "skyline/logger/StdoutLogger.hpp"
 
-#include "json.hpp"
-using json = nlohmann::json;
-
 #include "SigScan.h"
-#include "SigExpr.h"
 #include "Config.h"
+#include "SigExpr.h"
 
 using namespace std;
-
 struct PatternByte {
   struct PatternNibble {
     unsigned char data;
@@ -132,40 +128,43 @@ uintptr_t sigScanRaw(const char *category, const char* sigName) {
   logstr << "SigScan: looking for " << category << "/" << sigName << "... "
          << std::endl;
 
-  json sig = config["gamedef"]["signatures"][category][sigName];
-  std::string sPattern = sig["pattern"].get<std::string>();
-  const char* pattern = sPattern.c_str();
-  size_t offset = sig["offset"].get<size_t>();
+  cJSON *sig = cJSON_GetObjectItem(cJSON_GetObjectItem(cJSON_GetObjectItem(cJSON_GetObjectItem(config, "gamedef"), "signatures"), category), sigName);
+  const char* pattern = cJSON_GetStringValue(cJSON_GetObjectItem(sig, "pattern"));
+  size_t offset = (size_t)cJSON_GetNumberValue(cJSON_GetObjectItem(sig, "offset"));
 
-  logstr << sPattern << std::endl;
+  logstr << pattern << std::endl;
 
   uintptr_t baseAddress = skyline::utils::g_MainTextAddr;
   uintptr_t endAddress = skyline::utils::g_MainRodataAddr;
-  uintptr_t retval = FindPattern((unsigned char *)baseAddress,
+  
+  uintptr_t retval = FindPattern((unsigned char*)baseAddress,
                                  (unsigned char*)endAddress,
-                                 pattern, baseAddress,offset,
-                                 sig["occurrence"].get<int>());
+                                 pattern, baseAddress, offset,
+                                 (int)cJSON_GetNumberValue(cJSON_GetObjectItem(sig, "occurrence")));
 
   if (retval != NULL) {
-      // logstr << " found at 0x" << std::hex << retval;
-      // skyline::logger::s_Instance->Log(logstr.str().c_str());
+      logstr << " found at 0x" << std::hex << retval;
+      skyline::logger::s_Instance->Log(logstr.str().c_str());
       return retval;
   }
 
-  // logstr << " not found!";
-  // skyline::logger::s_Instance->LogFormat("%s", logstr.str().c_str());
+  logstr << " not found!";
+  skyline::logger::s_Instance->LogFormat("%s", logstr.str().c_str());
   return NULL;
 }
 
 
 uintptr_t sigScan(const char* category, const char* sigName) {
-  if (config["gamedef"]["signatures"][category].count(sigName) == 0){
+  cJSON *categoryJson = cJSON_GetObjectItem(cJSON_GetObjectItem(cJSON_GetObjectItem(config, "gamedef"), "signatures"), category);
+  
+  if (cJSON_HasObjectItem(categoryJson, sigName) == 0){
+    skyline::logger::s_Instance->LogFormat("where is %s bruh\n", sigName);
     return NULL;
   }
 
   uintptr_t raw = sigScanRaw(category, sigName);
-  json sig = config["gamedef"]["signatures"][category][sigName];
-  if (sig.count("expr") == 0) return raw;
+  cJSON *sig = cJSON_GetObjectItem(categoryJson, sigName);
+  if (cJSON_HasObjectItem(sig, "expr") == 0) return raw;
   if (raw == 0) return raw;
-  return SigExpr(sig["expr"].get<std::string>(), raw).evaluate();
+  return SigExpr(cJSON_GetStringValue(cJSON_GetObjectItem(sig, "expr")), raw).evaluate();
 }

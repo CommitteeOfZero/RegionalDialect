@@ -188,6 +188,22 @@ using GetFlagFunc = Result(uint flag);
 
 using MainMenuChangesFunc = Result(void);
 
+using SystemMenuDispFunc = Result(void);
+
+using MESrevDispTextFunc = Result(int fontSurfaceId, int maskSurfaceId, int param3, int param4,
+                                  int param5, int param6, int param7);
+
+using SpeakerDrawingFunctionFunc = Result(float param1, float param2, float param3, float param4, float param5,
+                                          float param6, int param7,   int param8,   uint param9, int param10);
+
+using OptionDispChip2Func = Result(uint param_1);
+
+using OptionMainFunc = Result(void);
+
+using SSEvolumeFunc = Result(uint param_1);
+
+using SSEplayFunc = Result(int param_1, int param_2);
+
 GSLfontStretchFFunc *GSLfontStretchFImpl;
 GSLfontStretchWithMaskFFunc *GSLfontStretchWithMaskFImpl;
 GSLfontStretchWithMaskExFFunc *GSLfontStretchWithMaskExFImpl;
@@ -200,6 +216,22 @@ MESdrawTextExFFunc *MESdrawTextExFImpl;
 GSLflatRectFFunc *GSLflatRectFImpl;
 SetFlagFunc *SetFlagImpl;
 GetFlagFunc *GetFlagImpl;
+SystemMenuDispFunc *SystemMenuDispImpl;
+MESrevDispTextFunc *MESrevDispTextImpl;
+SpeakerDrawingFunctionFunc *SpeakerDrawingFunctionImpl;
+OptionDispChip2Func *OptionDispChip2Impl;
+OptionMainFunc *OptionMainImpl;
+SSEvolumeFunc *SSEvolumeImpl;
+SSEplayFunc *SSEplayImpl;
+
+
+bool handleGetFlag(uint flag) {
+    return GetFlagImpl(flag);
+}
+
+void handleSetFlag(uint flag, uint setValue) {
+    SetFlagImpl(flag, setValue);
+}
 
 int handleGSLfontStretchF(
     int fontSurfaceId,
@@ -207,6 +239,10 @@ int handleGSLfontStretchF(
     float pos_x0, float pos_y0, float pos_x1, float pos_y1,
     uint color, int opacity, bool shrink
 ) {
+
+    if (!handleGetFlag(801) && fontSurfaceId == 91 && (pos_y0 == 760.5f || pos_y0 == 757.5f))
+        return 0;
+
     transformFontAtlasCoordinates(
         uv_x, uv_y, uv_w, uv_h,
         pos_x0, pos_y0, pos_x1, pos_y1
@@ -279,7 +315,6 @@ void handleTipsDataInit(ulong thread, ushort *addr1, ushort *addr2) {
 
     // Retrieve populated EPmax
     EPmax = get_u32(EPmaxPtr);
-    skyline::logger::s_Instance->LogFormat("EPmax: %d", EPmax);
 
     uintptr_t SystemMenuDispAddr = sigScan("game", "SystemMenuDisp");
 
@@ -744,13 +779,207 @@ void handleGSLflatRectF(int textureId, float spriteX, float spriteY,
                      opacity, unk);
 }
 
-uchar handleGetFlag(uint flag) {
-    return GetFlagImpl(flag);
+uintptr_t MESrevLineBufUsePtr;
+uintptr_t MESrevTextPtr;
+uintptr_t MESrevLineBufpPtr;
+uintptr_t MESrevDispLinePosPtr;
+uintptr_t MESrevDispLinePosYPtr;
+uintptr_t MESrevLineBufSizePtr;
+uintptr_t MESrevDispMaxPtr;
+uintptr_t MESrevTextSizePtr;
+uintptr_t MESrevTextPosPtr;
+uintptr_t MESrevDispPosPtr;
+uintptr_t MESrevTextColPtr;
+uintptr_t fontDrawModePtr;
+
+bool shown = false;
+
+void handleSystemMenuDisp(void) {
+    if (!handleGetFlag(801)) { SystemMenuDispImpl(); return; }
+
+    auto ScrWork = (int32_t *)(void *)get_ptr(ScrWorkPtr);
+    
+    if (ScrWork[2148] != 1 || shown) {
+        shown = ScrWork[2148] == 1;
+        SystemMenuDispImpl();
+        return;
+    }
+
+    shown = true;
+
+    uint32_t MESrevLineBufUse = get_u32(MESrevLineBufUsePtr);
+    uint32_t *MESrevDispLinePos = (uint32_t*)(void*)MESrevDispLinePosPtr;
+    uint32_t *MESrevLineBufp = (uint32_t*)(void*)MESrevLineBufpPtr;
+    unsigned short *MESrevText = (unsigned short*)(void*)MESrevTextPtr;
+    uint32_t *MESrevDispLinePosY = (uint32_t*)(void*)MESrevDispLinePosYPtr;
+    uint32_t *MESrevLineBufSize = (uint32_t*)(void*)MESrevLineBufSizePtr;
+
+    for (int i = 0; i < MESrevLineBufUse; i++) {
+        if ((short)MESrevText[MESrevLineBufp[MESrevDispLinePos[i]]] < 0) {
+            overwrite_u32(MESrevDispMaxPtr, get_u32(MESrevDispMaxPtr) + 30);
+            for (int j = i; j < MESrevLineBufUse; j++) MESrevDispLinePosY[j] += 30;
+        }
+    }
+    
+    SystemMenuDispImpl();
 }
 
-void handleSetFlag(uint flag, uint setValue) {
-    SetFlagImpl(flag, setValue);
+void handleMESrevDispText(int fontSurfaceId, int maskSurfaceId, int param3, int param4,
+                          int param5, int param6, int param7) {
+
+    if (!handleGetFlag(801)) {
+        MESrevDispTextImpl(fontSurfaceId, maskSurfaceId, param3, param4, param5, param6, param7);
+        return;
+    }
+
+    uint32_t MESrevLineBufUse = get_u32(MESrevLineBufUsePtr);
+    uint32_t *MESrevDispLinePos = (uint32_t*)(void*)MESrevDispLinePosPtr;
+    uint32_t *MESrevLineBufp = (uint32_t*)(void*)MESrevLineBufpPtr;
+    unsigned short *MESrevText = (unsigned short*)(void*)MESrevTextPtr;
+    uint32_t *MESrevDispLinePosY = (uint32_t*)(void*)MESrevDispLinePosYPtr;
+    uint32_t *MESrevLineBufSize = (uint32_t*)(void*)MESrevLineBufSizePtr;
+
+    uint8_t *MESrevTextSize = (uint8_t*)(void*)MESrevTextSizePtr;
+    uint32_t *MESrevTextPos = (uint32_t*)(void*)MESrevTextPosPtr;
+    uint32_t MESrevDispPos = get_u32(MESrevDispPosPtr);
+    uint8_t *MesFontColor = (uint8_t*)(void*)MesFontColorPtr;
+    uint8_t *MESrevTextCol = (uint8_t*)(void*)MESrevTextColPtr;
+
+    for (int i = 0; i < MESrevLineBufUse; i++) {
+        if ((short)MESrevText[MESrevLineBufp[MESrevDispLinePos[i]]] < 0) {
+            uint32_t iVar5 = (MESrevDispLinePosY[i] + param4) - MESrevDispPos - 17;
+            uint32_t widthAccum = 150;
+            for (uint nametagIndex = MESrevLineBufp[MESrevDispLinePos[i]] + 1;
+                (short)MESrevText[nametagIndex] > 0;
+                nametagIndex++) {
+            
+                uint32_t iVar15 = iVar5 + *(short*)((long)MESrevTextPos + (ulong)(nametagIndex << 1 | 1) * 2);
+                uint32_t currWidth = (28 * ourTable[MESrevText[nametagIndex]] / 32) * 1.5f;
+
+                handleGSLfontStretchWithMaskF(
+                    fontSurfaceId,
+                    maskSurfaceId,
+                    ((MESrevText[nametagIndex] & 0x3f) << 5) * 1.5f,
+                    ((MESrevText[nametagIndex] >> 1) & 0x7fe0) * 1.5f,
+                    MESrevTextSize[nametagIndex << 2] * 1.5f,
+                    MESrevTextSize[(nametagIndex << 2) | 1] * 1.5f,
+                    widthAccum,
+                    iVar15 * 1.5f,
+                    widthAccum + currWidth,
+                    (iVar15 + (32 * MESrevTextSize[(nametagIndex << 2) | 3] / 28) * 1.1f) * 1.5f,
+                    0,
+                    param7
+                );
+                
+                widthAccum += currWidth;
+            }
+        }
+    }
+
+    MESrevDispTextImpl(fontSurfaceId, maskSurfaceId, param3, param4, param5, param6, param7);
 }
+
+void handleSpeakerDrawingFunction(float param1, float param2, float param3, float param4, float param5,
+                                  float param6, int param7,   int param8,   uint param9,  int param10) {
+
+    if (handleGetFlag(801) && param1 == 28.0f && param3 == 42.0f && param4 == 36.0f && param5 == 93.0f)
+        param6 -= 45.0f;
+
+    SpeakerDrawingFunctionImpl(param1, param2, param3, param4, param5, param6, param7, param8, param9, param10);
+}
+
+uintptr_t OPTmenuModePtr;
+uintptr_t OPTmenuCurPtr;
+uintptr_t OPTmenuPagePtr;
+
+enum ToggleSel {
+    OFF,
+    ON,
+    INVALID
+};
+
+ToggleSel NPToggleSel = INVALID;
+
+void handleOptionDispChip2(uint param_1) {
+    OptionDispChip2Impl(param_1);
+
+    uint32_t OPTmenuMode = *(uint32_t*)(void*)OPTmenuModePtr;
+    uint8_t *OPTmenuCur = (uint8_t*)(void*)OPTmenuCurPtr;
+    uint32_t OPTmenuPage = *(uint32_t*)(void*)OPTmenuPagePtr;
+
+    // Nametag option text
+    handleGSLflatRectF(152, (OPTmenuMode == 2 && OPTmenuCur[OPTmenuPage * 4] == 3) * 577.0f, 2959.0f, 147.0f, 35.0f, 242.0f, 602.0f, 0xFFFFFF, param_1, 1);
+    // Divider
+    handleGSLflatRectF(152, 0.0f, 1346.0f, 1443.0f, 6.0f, 238.0f, 643.0f, 0xFFFFFF, param_1, 1);
+
+    // On/Off checkboxes
+    handleGSLflatRectF(152, 1449.0f, 1086.0f, 115.0f, 40.0f, 1411.0f, 601.0f, 0xFFFFFF, param_1, 1);
+    handleGSLflatRectF(152, 1449.0f, 1126.0f, 115.0f, 40.0f, 1537.0f, 601.0f, 0xFFFFFF, param_1, 1);
+
+    if (OPTmenuMode == 2 && OPTmenuCur[OPTmenuPage * 4] == 3) {
+        // Hover marker while selecting
+        handleGSLflatRectF(152, 1517.0f, 1408.0f, 42.0f, 42.0f, 1414.0f + 126.0f * (int)(NPToggleSel == OFF), 596.0f, 0xFFFFFF, param_1, 1);
+    }
+
+    // Checkmark on currently toggled option
+    handleGSLflatRectF(152, 1565.0f, 1408.0f, 42.0f, 42.0f, 1413.0f + 126.0f * (int)(!handleGetFlag(801)), 596.0f, 0xFFFFFF, param_1, 1);
+}
+
+void handleSSEvolume(uint param_1) {
+    SSEvolumeImpl(param_1);
+}
+
+void handleSSEplay(int param_1, int param_2 = 0xFFFFFFFF) {
+    SSEplayImpl(param_1, param_2);
+}
+
+uintptr_t PADcustomPtr;
+uintptr_t PADrefPtr;
+uintptr_t PADonePtr;
+uintptr_t SYSSEvolPtr;
+
+void handleOptionMain(void) {
+    uint32_t *OPTmenuMode = (uint32_t*)(void*)OPTmenuModePtr;
+    uint8_t *OPTmenuCur = (uint8_t*)(void*)OPTmenuCurPtr;
+    uint32_t *OPTmenuPage = (uint32_t*)(void*)OPTmenuPagePtr;
+    
+    if (*OPTmenuMode != 2 || OPTmenuCur[*OPTmenuPage * 4] != 3) {
+        OptionMainImpl();
+        
+        if (*OPTmenuMode == 2 && OPTmenuCur[*OPTmenuPage * 4] == 3) NPToggleSel = (ToggleSel)handleGetFlag(801);
+        return;
+    }
+    
+    // Nametag setting is selected
+    
+    uint32_t *PADcustom = (uint32_t*)(void*)PADcustomPtr;
+    uint32_t PADref = *(uint32_t*)(void*)PADrefPtr;
+    uint32_t PADone = *(uint32_t*)(void*)PADonePtr;
+
+    // PADcustom[2] = D-Pad Left
+    // PADcustom[3] = D-Pad Right
+
+    // PADcustom[5] = A
+    // PADcustom[6] = B
+
+    uint32_t SYSSEvol = *(uint32_t*)(void*)SYSSEvolPtr;
+
+    if (((PADcustom[2] | PADcustom[3]) & PADref) != 0) {
+        handleSSEvolume(SYSSEvol);
+        handleSSEplay(1);
+        NPToggleSel = ToggleSel(NPToggleSel ^ 1);
+    } else if ((PADcustom[5] & PADone) != 0) {
+        handleSSEvolume(SYSSEvol);
+        handleSSEplay(2);
+        handleSetFlag(801, NPToggleSel);
+        overwrite_u32(OPTmenuModePtr, 1); 
+    } else if ((PADcustom[6] & PADone) != 0) {
+        handleSSEvolume(SYSSEvol);
+        handleSSEplay(3);
+        overwrite_u32(OPTmenuModePtr, 1); 
+    }
+}
+
 
 void loadWidths() {
     Result rc = 0;
@@ -762,13 +991,160 @@ void loadWidths() {
         skyline::logger::s_Instance->LogFormat("Failed to load widths: 0x%x\n", rc);
 }
 
-static skyline::utils::Task* after_romfs_task = new skyline::utils::Task{[]() {
-    loadWidths();
-}};
+void hookFunctions() {
+    MEStextDatNumPtr = retrievePointer(sigScan("game", "MEStextDatNumPtr"), -0xC);
+    MESngFontListTopNumPtr = retrievePointer(sigScan("game", "MESngFontListTopNumPtr"), 0x8);
+    MESngFontListLastNumPtr = retrievePointer(sigScan("game", "MESngFontListLastNumPtr"), 0x8);
+    MEStextFlPtr = retrievePointer(sigScan("game", "MEStextFlPtr"), 0xC);
+    MEStextPtr = retrievePointer(sigScan("game", "MEStextPtr"), 0x10);
+    MESngFontListLastPtr = retrievePointer(sigScan("game", "MESngFontListLastPtr"), 0x20);
+    MESngFontListTopPtr = retrievePointer(sigScan("game", "MESngFontListTopPtr"), 0x24);
+    ScrWorkPtr = retrievePointer(sigScan("game", "ScrWorkPtr"));
+    MesFontColorPtr = retrievePointer(sigScan("game", "MesFontColorPtr"), 0x18);
+    EPmaxPtr = retrievePointer(sigScan("game", "EPmaxPtr"));
 
-void stub() {
+    uintptr_t MESsetNGflagAddr = sigScan("game", "MESsetNGflag");
+
+    MEStextDatNumPtr = retrievePointer(MESsetNGflagAddr + 28, -0xC);
+    MESngFontListTopNumPtr = retrievePointer(MESsetNGflagAddr + 28, 0x8);
+    MESngFontListLastNumPtr = retrievePointer(MESsetNGflagAddr + 32, 0x8);
+    MEStextFlPtr = retrievePointer(MESsetNGflagAddr + 48, 0xC);
+    MEStextPtr = retrievePointer(MESsetNGflagAddr + 52, 0x10);
+    MESngFontListLastPtr = retrievePointer (MESsetNGflagAddr + 56, 0x20);
+    MESngFontListTopPtr = retrievePointer(MESsetNGflagAddr + 64, 0x24);
+
+    uintptr_t MESrevDispTextAddr = sigScan("game", "MESrevDispText");
+    uintptr_t SystemMenuDispAddress = sigScan("game", "SystemMenuDisp");
+
+    MESrevLineBufUsePtr = retrievePointer(MESrevDispTextAddr + 40, 20);
+    MESrevDispMaxPtr = retrievePointer(SystemMenuDispAddress + 0x778);
+    MESrevTextSizePtr = MESrevTextPtr + 0x493e0;
+    MESrevTextPosPtr = MESrevTextPtr + 0x186a0;
+    MESrevDispPosPtr = retrievePointer(MESrevDispTextAddr + 0x124);
+    MESrevTextColPtr = MESrevTextSizePtr + 0x30d40;
+
+    A64HookFunction(
+        reinterpret_cast<void*>(sigScan("game", "GSLfontStretchF")),
+        reinterpret_cast<void*>(handleGSLfontStretchF),
+        (void **)&GSLfontStretchFImpl
+    );
+
+    A64HookFunction(
+        reinterpret_cast<void*>(sigScan("game", "GSLfontStretchWithMaskF")),
+        reinterpret_cast<void*>(handleGSLfontStretchWithMaskF),
+        (void **)&GSLfontStretchWithMaskFImpl
+    );
+
+    A64HookFunction(
+        reinterpret_cast<void*>(sigScan("game", "GSLfontStretchWithMaskExF")),
+        reinterpret_cast<void*>(handleGSLfontStretchWithMaskExF),
+        (void **)&GSLfontStretchWithMaskExFImpl
+    );
+
+    A64HookFunction(
+        reinterpret_cast<void*>(sigScan("game", "TipsDataInit")),
+        reinterpret_cast<void*>(handleTipsDataInit),
+        (void **)&TipsDataInitImpl
+    );
+
+    A64HookFunction(
+        reinterpret_cast<void*>(MESsetNGflagAddr),
+        reinterpret_cast<void*>(handleMESsetNGflag),
+        (void **)&MESsetNGflagImpl
+    );
+
+    A64HookFunction(
+        reinterpret_cast<void*>(sigScan("game", "ChatLayout")),
+        reinterpret_cast<void*>(handleChatLayout),
+        (void **)&ChatLayoutImpl
+    );
+
+    A64HookFunction(
+        reinterpret_cast<void*>(sigScan("game", "calMain")),
+        reinterpret_cast<void*>(handlecalMain),
+        (void **)&calMainImpl
+    );
+
+    A64HookFunction(
+        reinterpret_cast<void*>(sigScan("game", "ChatRendering")),
+        reinterpret_cast<void*>(handleChatRendering),
+        (void **)&ChatRenderingImpl
+    );
+
+    A64HookFunction(
+        reinterpret_cast<void*>(sigScan("game", "MESdrawTextExF")),
+        reinterpret_cast<void*>(handleMESdrawTextExF),
+        (void **)&MESdrawTextExFImpl
+    );
+
+    A64HookFunction(
+        reinterpret_cast<void*>(sigScan("game", "GSLflatRectF")),
+        reinterpret_cast<void*>(handleGSLflatRectF),
+        (void **)&GSLflatRectFImpl
+    );
+
+    A64HookFunction(
+        reinterpret_cast<void*>(sigScan("game", "SetFlag")),
+        reinterpret_cast<void*>(handleSetFlag),
+        (void **)&SetFlagImpl
+    );
+
+    A64HookFunction(
+        reinterpret_cast<void*>(sigScan("game", "GetFlag")),
+        reinterpret_cast<void*>(handleGetFlag),
+        (void **)&GetFlagImpl
+    );
+    
+    A64HookFunction(
+        reinterpret_cast<void*>(MESrevDispTextAddr),
+        reinterpret_cast<void*>(handleMESrevDispText),
+        (void **)&MESrevDispTextImpl
+    );
+
+    A64HookFunction(
+        reinterpret_cast<void*>(SystemMenuDispAddress),
+        reinterpret_cast<void*>(handleSystemMenuDisp),
+        (void **)&SystemMenuDispImpl
+    );
+
+    A64HookFunction(
+        reinterpret_cast<void*>(sigScan("game", "SpeakerDrawingFunction")),
+        reinterpret_cast<void*>(handleSpeakerDrawingFunction),
+        (void **)&SpeakerDrawingFunctionImpl
+    );
+
+    A64HookFunction(
+        reinterpret_cast<void*>(sigScan("game", "OptionDispChip2")),
+        reinterpret_cast<void*>(handleOptionDispChip2),
+        (void **)&OptionDispChip2Impl
+    );
+
+    A64HookFunction(
+        reinterpret_cast<void*>(sigScan("game", "OptionMain")),
+        reinterpret_cast<void*>(handleOptionMain),
+        (void **)&OptionMainImpl
+    );
+
+    A64HookFunction(
+        reinterpret_cast<void*>(sigScan("game", "SSEvolumePattern")),
+        reinterpret_cast<void*>(handleSSEvolume),
+        (void **)&SSEvolumeImpl
+    );
+
+    A64HookFunction(
+        reinterpret_cast<void*>(sigScan("game", "SSEplayPattern")),
+        reinterpret_cast<void*>(handleSSEplay),
+        (void **)&SSEplayImpl
+    );
 }
 
+static skyline::utils::Task* after_romfs_task = new skyline::utils::Task{[]() {
+    loadWidths();
+    configInit();
+    hookFunctions();
+}};
+
+void stub() {}
 
 Result (*nnFsMountRomImpl)(char const*, void*, unsigned long);
 Result handleNnFsMountRom(char const* path, void* buffer, unsigned long size) {
@@ -851,15 +1227,6 @@ void skyline_main() {
     const char *audioLoweringPattern =                      "187F0153";
     const std::vector<const char *> widthCheckPatterns =    {"1F790571", "3F790571", "3F7D0571", "5F790571", "7F790571", "7F3D0671", "BF3D0671", "7F7D0571", "5F3D0671"};
     const char *SaveMenuGuidePattern =                      "010000001027";
-    const char *SetFlagPattern =                            "090800122A0080524921C91AAA1900B04A0D41F94B0140F9";
-    const char *GetFlagPattern =                            "AA1900B04A0D41F94A0140F9E803002A08FD43D30908";
-
-    skyline::logger::s_Instance->Log("Before configInit\n");
-    configInit();
-    skyline::logger::s_Instance->Log("After configInit\n");
-
-    uintptr_t MESsetNGflagAddr = sigScan("game", "MESsetNGflag");
-    uintptr_t TipsDataInitAddr = sigScan("game", "TipsDataInit");
 
     codeCaves = skyline::utils::g_MainRodataAddr - 0xC30;
     englishTipsHideBranch1 = code + 0x248a8;
@@ -867,16 +1234,23 @@ void skyline_main() {
     englishTipsHideBranch2 = code + 0x2499c;
     englishTipsShowBranch2 = code + 0x249b4;
 
-    MEStextDatNumPtr = retrievePointer(sigScan("game", "MEStextDatNumPtr"), -0xC);
-    MESngFontListTopNumPtr = retrievePointer(sigScan("game", "MESngFontListTopNumPtr"), 0x8);
-    MESngFontListLastNumPtr = retrievePointer(sigScan("game", "MESngFontListLastNumPtr"), 0x8);
-    MEStextFlPtr = retrievePointer(sigScan("game", "MEStextFlPtr"), 0xC);
-    MEStextPtr = retrievePointer(sigScan("game", "MEStextPtr"), 0x10);
-    MESngFontListLastPtr = retrievePointer(sigScan("game", "MESngFontListLastPtr"), 0x20);
-    MESngFontListTopPtr = retrievePointer(sigScan("game", "MESngFontListTopPtr"), 0x24);
-    ScrWorkPtr = retrievePointer(sigScan("game", "ScrWorkPtr"));
-    MesFontColorPtr = retrievePointer(sigScan("game", "MesFontColorPtr"), 0x18);
-    EPmaxPtr = retrievePointer(sigScan("game", "EPmaxPtr"));
+    MESrevTextPtr = code + 0x7b0780;
+    MESrevLineBufpPtr = code + 0x842f4c;
+    MESrevDispLinePosPtr = code + 0xa4a4d0;
+    MESrevDispLinePosYPtr = code + 0xa4b794;
+    MESrevLineBufSizePtr = code + 0x873c8c;
+    fontDrawModePtr = code + 0x16a3e8;
+    OPTmenuModePtr = code + 0x78cbcc;
+    OPTmenuCurPtr = code + 0x78cbd4;
+    OPTmenuPagePtr = code + 0x78cbd0;
+    PADcustomPtr = code + 0xa4e690;
+    PADrefPtr = code + 0x77eebc;
+    PADonePtr = code + 0x77ee94;
+    SYSSEvolPtr = code + 0x1a07e98;
+
+    uintptr_t OPTmenuCurMaxPtr = code + 0x16b194;
+    uint8_t *OPTmenuCurMax = (uint8_t*)(void*)OPTmenuCurMaxPtr;
+    OPTmenuCurMax[4] = 4;
 
     uintptr_t fontAlineAddr = FindPattern((unsigned char*)skyline::utils::g_MainDataAddr, (unsigned char*)skyline::utils::g_MainBssAddr, fontAlinePattern, skyline::utils::g_MainDataAddr, 0, 0);
     char fontAlineAddrStr[9];
@@ -945,77 +1319,6 @@ void skyline_main() {
     // Fix shortcut bug
     overwrite_u32(code + 0x2c140, 0x52806E00);
 
-    A64HookFunction(
-        reinterpret_cast<void*>(sigScan("game", "GSLfontStretchF")),
-        reinterpret_cast<void*>(handleGSLfontStretchF),
-        (void **)&GSLfontStretchFImpl
-    );
-
-    A64HookFunction(
-        reinterpret_cast<void*>(sigScan("game", "GSLfontStretchWithMaskF")),
-        reinterpret_cast<void*>(handleGSLfontStretchWithMaskF),
-        (void **)&GSLfontStretchWithMaskFImpl
-    );
-
-    A64HookFunction(
-        reinterpret_cast<void*>(sigScan("game", "GSLfontStretchWithMaskExF")),
-        reinterpret_cast<void*>(handleGSLfontStretchWithMaskExF),
-        (void **)&GSLfontStretchWithMaskExFImpl
-    );
-
-    A64HookFunction(
-        reinterpret_cast<void*>(TipsDataInitAddr),
-        reinterpret_cast<void*>(handleTipsDataInit),
-        (void **)&TipsDataInitImpl
-    );
-
-    A64HookFunction(
-        reinterpret_cast<void*>(MESsetNGflagAddr),
-        reinterpret_cast<void*>(handleMESsetNGflag),
-        (void **)&MESsetNGflagImpl
-    );
-
-    A64HookFunction(
-        reinterpret_cast<void*>(sigScan("game", "ChatLayout")),
-        reinterpret_cast<void*>(handleChatLayout),
-        (void **)&ChatLayoutImpl
-    );
-
-    A64HookFunction(
-        reinterpret_cast<void*>(sigScan("game", "calMain")),
-        reinterpret_cast<void*>(handlecalMain),
-        (void **)&calMainImpl
-    );
-
-    A64HookFunction(
-        reinterpret_cast<void*>(sigScan("game", "ChatRendering")),
-        reinterpret_cast<void*>(handleChatRendering),
-        (void **)&ChatRenderingImpl
-    );
-
-    A64HookFunction(
-        reinterpret_cast<void*>(sigScan("game", "MESdrawTextExF")),
-        reinterpret_cast<void*>(handleMESdrawTextExF),
-        (void **)&MESdrawTextExFImpl
-    );
-
-    A64HookFunction(
-        reinterpret_cast<void*>(sigScan("game", "GSLflatRectF")),
-        reinterpret_cast<void*>(handleGSLflatRectF),
-        (void **)&GSLflatRectFImpl
-    );
-
-    // A64HookFunction(
-    //     reinterpret_cast<void*>(FindPattern((unsigned char*)code, (unsigned char*)skyline::utils::g_MainRodataAddr, SetFlagPattern, code, 0, 0)),
-    //     reinterpret_cast<void*>(handleSetFlag),
-    //     (void **)&SetFlagImpl
-    // );
-
-    // A64HookFunction(
-    //     reinterpret_cast<void*>(FindPattern((unsigned char*)code, (unsigned char*)skyline::utils::g_MainRodataAddr, GetFlagPattern, code, 0, 0)),
-    //     reinterpret_cast<void*>(handleGetFlag),
-    //     (void **)&GetFlagImpl
-    // );
 }   
 
 extern "C" void skyline_init() {

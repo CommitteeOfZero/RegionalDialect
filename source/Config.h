@@ -1,8 +1,7 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#include "json.hpp"
-using json = nlohmann::json;
+#include "cJSON.h"
 
 #ifdef DEFINE_CONFIG
 #define CONFIG_GLOBAL
@@ -10,8 +9,8 @@ using json = nlohmann::json;
 #define CONFIG_GLOBAL extern
 #endif
 
-CONFIG_GLOBAL json config;
-void configInit();
+CONFIG_GLOBAL cJSON *config;
 
+void configInit();
 
 #endif  // !__CONFIG_H__

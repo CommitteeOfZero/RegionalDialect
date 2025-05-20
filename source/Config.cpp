@@ -1,6 +1,5 @@
 #define DEFINE_CONFIG
 
-#include <sstream>
 #include "Config.h"
 
 #include "skyline/utils/cpputils.hpp"
@@ -8,21 +7,19 @@
 
 extern std::string RomMountPath;
 
-void configLoadFiles();
-
 void configInit() {
-  configLoadFiles();
-}
+    char *contents;
+    Result rc = skyline::utils::readEntireFile(RomMountPath + "/system/gamedef.json", (void**)(&contents), NULL);
+    
+    if (R_FAILED(rc)) {
+        skyline::logger::s_Instance->LogFormat("Failed to load gamedef.json: 0x%x\n", rc);
+        return;
+    }
+    
+    skyline::logger::s_Instance->Log("Successfully loaded gamedef.json\n");
+    
+    config = cJSON_CreateObject();
+    cJSON_AddItemToObject(config, "gamedef", cJSON_Parse(contents));
 
-
-void configLoadFiles() {
-  char *contents;
-
-  R_ERRORONFAIL(skyline::utils::readEntireFile(RomMountPath + "/system/gamedef.json", reinterpret_cast<void**>(&contents), NULL));
-  
-  std::stringstream output(contents);
-
-  json j;
-  output >> j;
-  config["gamedef"] = j;
+    free(contents);
 }
