@@ -1126,13 +1126,13 @@ void hookFunctions() {
     );
 
     A64HookFunction(
-        reinterpret_cast<void*>(sigScan("game", "SSEvolumePattern")),
+        reinterpret_cast<void*>(sigScan("game", "SSEvolume")),
         reinterpret_cast<void*>(handleSSEvolume),
         (void **)&SSEvolumeImpl
     );
 
     A64HookFunction(
-        reinterpret_cast<void*>(sigScan("game", "SSEplayPattern")),
+        reinterpret_cast<void*>(sigScan("game", "SSEplay")),
         reinterpret_cast<void*>(handleSSEplay),
         (void **)&SSEplayImpl
     );

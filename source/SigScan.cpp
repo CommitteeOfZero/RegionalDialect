@@ -128,9 +128,9 @@ uintptr_t sigScanRaw(const char *category, const char* sigName) {
   logstr << "SigScan: looking for " << category << "/" << sigName << "... "
          << std::endl;
 
-  cJSON *sig = cJSON_GetObjectItem(cJSON_GetObjectItem(cJSON_GetObjectItem(cJSON_GetObjectItem(config, "gamedef"), "signatures"), category), sigName);
-  const char* pattern = cJSON_GetStringValue(cJSON_GetObjectItem(sig, "pattern"));
-  size_t offset = (size_t)cJSON_GetNumberValue(cJSON_GetObjectItem(sig, "offset"));
+  JsonWrapper sig = config["gamedef"]["signatures"][category][sigName];
+  const char* pattern = sig.get<char*>("pattern");
+  size_t offset = sig.get<size_t>("offset");
 
   logstr << pattern << std::endl;
 
@@ -140,7 +140,7 @@ uintptr_t sigScanRaw(const char *category, const char* sigName) {
   uintptr_t retval = FindPattern((unsigned char*)baseAddress,
                                  (unsigned char*)endAddress,
                                  pattern, baseAddress, offset,
-                                 (int)cJSON_GetNumberValue(cJSON_GetObjectItem(sig, "occurrence")));
+                                 sig.get<int>("occurrence"));
 
   if (retval != NULL) {
       logstr << " found at 0x" << std::hex << retval;
@@ -155,16 +155,14 @@ uintptr_t sigScanRaw(const char *category, const char* sigName) {
 
 
 uintptr_t sigScan(const char* category, const char* sigName) {
-  cJSON *categoryJson = cJSON_GetObjectItem(cJSON_GetObjectItem(cJSON_GetObjectItem(config, "gamedef"), "signatures"), category);
-  
-  if (cJSON_HasObjectItem(categoryJson, sigName) == 0){
-    skyline::logger::s_Instance->LogFormat("where is %s bruh\n", sigName);
+  if (!config["gamedef"]["signatures"][category].has(sigName)){
+    skyline::logger::s_Instance->LogFormat("Signature for %s is missing!\n", sigName);
     return NULL;
   }
 
   uintptr_t raw = sigScanRaw(category, sigName);
-  cJSON *sig = cJSON_GetObjectItem(categoryJson, sigName);
-  if (cJSON_HasObjectItem(sig, "expr") == 0) return raw;
+  JsonWrapper sig = config["gamedef"]["signatures"][category][sigName];
+  if (!sig.has("expr")) return raw;
   if (raw == 0) return raw;
-  return SigExpr(cJSON_GetStringValue(cJSON_GetObjectItem(sig, "expr")), raw).evaluate();
+  return SigExpr(sig.get<char*>("expr"), raw).evaluate();
 }
