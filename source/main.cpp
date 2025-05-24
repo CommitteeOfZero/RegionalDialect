@@ -224,7 +224,6 @@ OptionMainFunc *OptionMainImpl;
 SSEvolumeFunc *SSEvolumeImpl;
 SSEplayFunc *SSEplayImpl;
 
-
 bool handleGetFlag(uint flag) {
     return GetFlagImpl(flag);
 }
@@ -233,6 +232,8 @@ void handleSetFlag(uint flag, uint setValue) {
     SetFlagImpl(flag, setValue);
 }
 
+uintptr_t MesNameDispLenPtr;
+
 int handleGSLfontStretchF(
     int fontSurfaceId,
     float uv_x, float uv_y, float uv_w, float uv_h,
@@ -240,8 +241,12 @@ int handleGSLfontStretchF(
     uint color, int opacity, bool shrink
 ) {
 
-    if (!handleGetFlag(801) && fontSurfaceId == 91 && (pos_y0 == 760.5f || pos_y0 == 757.5f))
-        return 0;
+    if (fontSurfaceId == 91 && (pos_y0 == 760.5f || pos_y0 == 757.5f)) {
+        if (!handleGetFlag(801)) return 0;
+        uint *MesNameDispLen = (uint*)(void*)(MesNameDispLenPtr);
+        pos_x0 += (MesNameDispLen[0] * 1.5f) / 2.0f;
+        pos_x1 += (MesNameDispLen[0] * 1.5f) / 2.0f;;
+    }
 
     transformFontAtlasCoordinates(
         uv_x, uv_y, uv_w, uv_h,
@@ -1247,6 +1252,7 @@ void skyline_main() {
     PADrefPtr = code + 0x77eebc;
     PADonePtr = code + 0x77ee94;
     SYSSEvolPtr = code + 0x1a07e98;
+    MesNameDispLenPtr = code + 0xa49674;
 
     uintptr_t OPTmenuCurMaxPtr = code + 0x16b194;
     uint8_t *OPTmenuCurMax = (uint8_t*)(void*)OPTmenuCurMaxPtr;
