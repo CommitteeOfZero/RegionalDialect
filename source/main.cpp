@@ -225,7 +225,9 @@ SSEvolumeFunc *SSEvolumeImpl;
 SSEplayFunc *SSEplayImpl;
 
 bool handleGetFlag(uint flag) {
-    return GetFlagImpl(flag);
+    bool res = GetFlagImpl(flag);
+    if (flag != 3877) return res;
+    return GetFlagImpl(873) && res;
 }
 
 void handleSetFlag(uint flag, uint setValue) {
