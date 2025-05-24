@@ -150,6 +150,11 @@
                 "occurence": 0,
                 "offset": 0,
                 "pattern": "FD 7B BC A9 F7 0B 00 F9 FD 03 00 91 F6 57 02 A9 F4 4F 03 A9 E8 FF 9F"
+            },
+            "MESrevDispInit" : {
+                "occurence": 0,
+                "offset": 0,
+                "pattern": "FD 7B BF A9 FD 03 00 91 ?? ?? ?? ?? 6C 1A 00 F0 8C 0D 45 F9 9F"
             }
         }
     }

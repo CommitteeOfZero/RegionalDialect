@@ -188,7 +188,7 @@ using GetFlagFunc = Result(uint flag);
 
 using MainMenuChangesFunc = Result(void);
 
-using SystemMenuDispFunc = Result(void);
+using MESrevDispInitFunc = Result(void);
 
 using MESrevDispTextFunc = Result(int fontSurfaceId, int maskSurfaceId, int param3, int param4,
                                   int param5, int param6, int param7);
@@ -216,7 +216,7 @@ MESdrawTextExFFunc *MESdrawTextExFImpl;
 GSLflatRectFFunc *GSLflatRectFImpl;
 SetFlagFunc *SetFlagImpl;
 GetFlagFunc *GetFlagImpl;
-SystemMenuDispFunc *SystemMenuDispImpl;
+MESrevDispInitFunc *MESrevDispInitImpl;
 MESrevDispTextFunc *MESrevDispTextImpl;
 SpeakerDrawingFunctionFunc *SpeakerDrawingFunctionImpl;
 OptionDispChip2Func *OptionDispChip2Impl;
@@ -799,18 +799,10 @@ uintptr_t fontDrawModePtr;
 
 bool shown = false;
 
-void handleSystemMenuDisp(void) {
-    if (!handleGetFlag(801)) { SystemMenuDispImpl(); return; }
-
-    auto ScrWork = (int32_t *)(void *)get_ptr(ScrWorkPtr);
+void handleMESrevDispInit(void) {
+    MESrevDispInitImpl();
     
-    if (ScrWork[2148] != 1 || shown) {
-        shown = ScrWork[2148] == 1;
-        SystemMenuDispImpl();
-        return;
-    }
-
-    shown = true;
+    if (!handleGetFlag(801)) return;
 
     uint32_t MESrevLineBufUse = get_u32(MESrevLineBufUsePtr);
     uint32_t *MESrevDispLinePos = (uint32_t*)(void*)MESrevDispLinePosPtr;
@@ -822,11 +814,10 @@ void handleSystemMenuDisp(void) {
     for (int i = 0; i < MESrevLineBufUse; i++) {
         if ((short)MESrevText[MESrevLineBufp[MESrevDispLinePos[i]]] < 0) {
             overwrite_u32(MESrevDispMaxPtr, get_u32(MESrevDispMaxPtr) + 30);
+            overwrite_u32(MESrevDispPosPtr, get_u32(MESrevDispPosPtr) + 30);
             for (int j = i; j < MESrevLineBufUse; j++) MESrevDispLinePosY[j] += 30;
         }
     }
-    
-    SystemMenuDispImpl();
 }
 
 void handleMESrevDispText(int fontSurfaceId, int maskSurfaceId, int param3, int param4,
@@ -1107,9 +1098,9 @@ void hookFunctions() {
     );
 
     A64HookFunction(
-        reinterpret_cast<void*>(SystemMenuDispAddress),
-        reinterpret_cast<void*>(handleSystemMenuDisp),
-        (void **)&SystemMenuDispImpl
+        reinterpret_cast<void*>(sigScan("game", "MESrevDispInit")),
+        reinterpret_cast<void*>(handleMESrevDispInit),
+        (void **)&MESrevDispInitImpl
     );
 
     A64HookFunction(
