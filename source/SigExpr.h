@@ -6,56 +6,48 @@
 #include <string>
 
 enum SigExprTokenType {
-  Start,
-  Plus,
-  Minus,
-  Deref,
-  LParen,
-  RParen,
-  Number,
-  Ptr,
-  EOL
+    Start,
+    Plus,
+    Minus,
+    Deref,
+    LParen,
+    RParen,
+    Comma,
+    Number,
+    Ptr,
+    End
 };
 
-struct SigExprToken_t {
-  SigExprTokenType type;
-  uintptr_t value;
+struct SigExprToken {
+    SigExprTokenType type;
+    uintptr_t value;
 };
-
-const static std::map<SigExprTokenType, std::string> SigExprTokenTypeString = {
-    {Start, "Start"},   {Plus, "Plus"},     {Minus, "Minus"},
-    {Deref, "Deref"},   {LParen, "LParen"}, {RParen, "RParen"},
-    {Number, "Number"}, {Ptr, "Ptr"},       {EOL, "EOL"}};
 
 class SigExprLexer {
- public:
-  SigExprLexer(const std::string& _input) : input(_input) {
-    currentToken = {Start, 0};
-  }
-
-  SigExprToken_t getToken();
-  void consumeToken();
-
- private:
-  const std::string& input;
-  size_t pos = 0;
-  SigExprToken_t currentToken;
+  private:
+    const std::string &input;
+    size_t pos = 0;
+    SigExprToken currentToken;
+    const static std::map<const char, SigExprTokenType> tokenMapping;
+  public:
+    friend class SigExprParser;
+    SigExprLexer(const std::string &input);
+    SigExprToken getToken();
+    void nextToken();
 };
 
-class SigExpr {
- public:
-  SigExpr(const std::string& _input, uintptr_t _ptr)
-      : input(_input), lexer(_input), ptr(_ptr) {}
 
-  uintptr_t evaluate();
+class SigExprParser {
+  private:
+    SigExprLexer lexer;
+    const uintptr_t ptr;
 
- private:
-  SigExprLexer lexer;
-  const std::string& input;
-  const uintptr_t ptr;
-
-  uintptr_t expression();
-  uintptr_t summand(bool onlyDereferable);
+    uintptr_t expression(bool allowComma = true);
+    uintptr_t summand(bool onlyDereferable, bool allowComma = true);
+    const static std::map<SigExprTokenType, const std::string&> tokenType;
+  public:
+    SigExprParser(const std::string& input, uintptr_t ptr);
+    uintptr_t eval();
 };
 
 #endif  // !__SIGEXPR_H__

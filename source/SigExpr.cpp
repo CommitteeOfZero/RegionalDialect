@@ -2,121 +2,111 @@
 #include <sstream>
 #include <string.h>
 
-
-#include "skyline/logger/TcpLogger.hpp"
 #include "skyline/logger/StdoutLogger.hpp"
 
+#include "MemUtils.h"
 #include "SigExpr.h"
 
-SigExprToken_t SigExprLexer::getToken() {
-  if (currentToken.type == Start) consumeToken();
-  return currentToken;
+const std::map<const char, SigExprTokenType> SigExprLexer::tokenMapping = {
+    { '+', Plus,  }, { '-', Minus  },
+    { '*', Deref  }, { '(', LParen },
+    { ')', RParen }, { ',', Comma  },
+};
+
+const std::map<SigExprTokenType, const std::string&> SigExprParser::tokenType = {
+    { Start,  "Start"  }, { Plus,   "Plus"   },
+    { Minus,  "Minus"  }, { Deref,  "Deref"  },
+    { LParen, "LParen" }, { RParen, "RParen" },
+    { Comma,  "Comma"  }, { Number, "Number" },
+    { Ptr,    "Ptr"    }, { End,    "End"    }
+};
+    
+SigExprLexer::SigExprLexer(const std::string &input) : input(input), currentToken({ Start, 0 }) {}
+
+SigExprToken SigExprLexer::getToken() {
+    if (currentToken.type == Start) nextToken();
+    return currentToken;
 }
 
-void SigExprLexer::consumeToken() {
-  while (pos < input.size() && std::isspace(input.at(pos))) pos++;
-  if (pos < input.size()) {
-    if (input.at(pos) == '+') {
-      currentToken = {Plus, 0};
-      pos++;
-    } else if (input.at(pos) == '-') {
-      currentToken = {Minus, 0};
-      pos++;
-    } else if (input.at(pos) == '*') {
-      currentToken = {Deref, 0};
-      pos++;
-    } else if (input.at(pos) == '(') {
-      currentToken = {LParen, 0};
-      pos++;
-    } else if (input.at(pos) == ')') {
-      currentToken = {RParen, 0};
-      pos++;
-    } else if (std::isdigit(input.at(pos))) {
-      char* end;
-      currentToken = {Number, (uintptr_t)std::strtoull(input.c_str() + pos, &end, 0)};
-      pos = end - input.c_str();
-    } else if (pos + 2 < input.size() &&
-               strncasecmp(input.c_str() + pos, "ptr", 3) == 0) {
-      currentToken = {Ptr, 0};
-      pos += 3;
+void SigExprLexer::nextToken() {
+    while (pos < input.size() && std::isspace(input[pos])) pos++;
+    
+    decltype(tokenMapping)::const_iterator it;
+
+    if (pos >= input.size()) currentToken = {End, 0};
+    else if ((it = tokenMapping.find(input[pos])) != tokenMapping.end()) { currentToken = { it->second, 0 }; pos++; }
+    else if (std::isdigit(input[pos])) {
+        char *end;
+        currentToken = { Number, (uintptr_t)std::strtoull(input.c_str() + pos, &end, 0) };
+        pos = end - input.c_str();
+    } else if (pos + 2 < input.size() && strncasecmp(input.c_str() + pos, "ptr", 3) == 0) {
+        currentToken = { Ptr, 0 };
+        pos += 3;
     } else {
-      // std::stringstream ss;
-      // ss << "Lex error in '" << input << "at position " << pos
-      //    << ": unexpected character '" << input.at(pos) << "'";
-      // skyline::logger::s_Instance->Log(ss.str());
-      // exit(1);
+        skyline::logger::s_Instance->LogFormat("Lexing error in '%s' at position %lu: Unexpected character: '%c'", input, pos, input[pos]);
+        std::exit(1);
     }
-  } else {
-    currentToken = {EOL, 0};
-  }
 }
 
-uintptr_t SigExpr::evaluate() {
-  uintptr_t result = expression();
-  SigExprToken_t expectedEol = lexer.getToken();
-  if (expectedEol.type != EOL) {
-    // std::stringstream ss;
-    // ss << "Parse error in '" << input << ": Expected EOL, got "
-    //    << SigExprTokenTypeString.at(expectedEol.type);
-    // skyline::logger::s_Instance->Log(ss.str());
-    // exit(1);
-  }
-  return result;
+SigExprParser::SigExprParser(const std::string &input, uintptr_t ptr) : lexer(input), ptr(ptr) {}
+
+uintptr_t SigExprParser::eval() {
+    uintptr_t result = expression();
+    if (lexer.getToken().type != End) {
+        skyline::logger::s_Instance->LogFormat("Parsing error in '%s': Expected EOL, got %s.\n", lexer.input, tokenType.find(lexer.getToken().type)->second.c_str());
+        std::exit(1);
+    }
+    return result;
 }
 
-uintptr_t SigExpr::expression() {
-  uintptr_t result = summand(false);
+uintptr_t SigExprParser::expression(bool allowComma) {
+    uintptr_t result = summand(false, allowComma);
 
-  SigExprToken_t token = lexer.getToken();
-  while (token.type == Plus || token.type == Minus) {
-    lexer.consumeToken();
-    if (token.type == Plus)
-      result += summand(false);
-    else
-      result -= summand(false);
-    token = lexer.getToken();
-  }
+    SigExprToken token = lexer.getToken();
+    while (token.type == Plus || token.type == Minus) {
+        lexer.nextToken();
 
-  return result;
+        result += summand(false, allowComma) * (token.type == Plus ? 1 : -1);
+        token = lexer.getToken();
+    }
+    return result;
 }
 
-uintptr_t SigExpr::summand(bool onlyDereferable) {
-  SigExprToken_t token = lexer.getToken();
-  lexer.consumeToken();
+uintptr_t SigExprParser::summand(bool onlyDereferable, bool allowComma) {
+    SigExprToken token = lexer.getToken();
+    lexer.nextToken();
 
-  switch (token.type) {
-    case Deref: {
-      return *(uint32_t*)(summand(true));
-      break;
-    }
-    case LParen: {
-      uintptr_t result = expression();
-      SigExprToken_t expectedRparen = lexer.getToken();
-      lexer.consumeToken();
-      if (expectedRparen.type != RParen) {
-        // std::stringstream ss;
-        // ss << "Parse error in '" << input << ": Expected RParen, got "
-        //    << SigExprTokenTypeString.at(expectedRparen.type);
-        // skyline::logger::s_Instance->Log(ss.str());
-        // exit(1);
-      }
-      return result;
-      break;
-    }
-    case Ptr: {
-      return ptr;
-      break;
-    }
-    case Number: {
-      if (!onlyDereferable) return token.value;
-      break;
-    }
-  }
+    switch (token.type) {
+        case Deref: {
+            return *(uint64_t*)(summand(true, allowComma));
+        }
+        case LParen: {
+            uintptr_t result = expression();
+            SigExprToken token = lexer.getToken();
+            lexer.nextToken();
 
-  // if we're still here
-  // std::stringstream ss;
-  // ss << "Parse error in '" << input << ": Unexpected token "
-  //    << SigExprTokenTypeString.at(token.type);
-  // skyline::logger::s_Instance->Log(ss.str());
-  // exit(1);
+            if (token.type == Comma && allowComma) {
+                uintptr_t offset = expression(false);
+                result = retrievePointer(result, offset);
+                token = lexer.getToken();
+                lexer.nextToken();
+                break;
+            } 
+            
+            if (token.type != RParen) break;
+            return result;
+        }
+        case Ptr: {
+            return ptr;
+        }
+        case Number: {
+            if (!onlyDereferable) return token.value;
+            break;
+        }
+        default:
+            break;
+    }
+
+    skyline::logger::s_Instance->LogFormat("Parsing error in '%s': Expected EOL, got %s.\n", lexer.input, tokenType.find(lexer.getToken().type)->second.c_str());
+    std::exit(1);
 }

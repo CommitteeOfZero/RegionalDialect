@@ -164,5 +164,5 @@ uintptr_t sigScan(const char* category, const char* sigName) {
   JsonWrapper sig = config["gamedef"]["signatures"][category][sigName];
   if (!sig.has("expr")) return raw;
   if (raw == 0) return raw;
-  return SigExpr(sig.get<char*>("expr"), raw).evaluate();
+  return SigExprParser(sig.get<char*>("expr"), raw).eval();
 }
