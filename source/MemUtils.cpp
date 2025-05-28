@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "skyline/inlinehook/controlledpages.hpp"
 #include "skyline/logger/StdoutLogger.hpp"
@@ -24,6 +25,17 @@ void overwrite_u32(uintptr_t address, uint32_t value) {
     uint32_t *rw = (uint32_t *)control.rw;
     *rw = value;
     __flush_cache((void *)address, sizeof(uint32_t));
+
+    control.unclaim();
+}
+
+void _memset(uintptr_t address, uchar value, size_t size) {
+    skyline::inlinehook::ControlledPages control((void *)address, size);
+    control.claim();
+
+    uchar *rw = (uchar *)control.rw;
+    std::memset(rw, value, size);
+    __flush_cache((void *)address, size);
 
     control.unclaim();
 }
@@ -73,5 +85,5 @@ uintptr_t retrievePointer(uint64_t adrp_addr, uint64_t ldr_offset) {
     skyline::logger::s_Instance->LogFormat("offsetFromPageStartInst: 0x%x\n", offsetFromPageStartInst);
     uint32_t offsetFromPageStart = ((offsetFromPageStartInst >> 10) & 0xFFF) << (((offsetFromPageStartInst) >> 30) & 0b11);
     
-    return get_ptr(pageAddr + offsetFromPageStart);
+    return pageAddr + offsetFromPageStart;
 }

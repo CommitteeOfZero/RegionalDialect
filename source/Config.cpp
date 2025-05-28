@@ -1,5 +1,7 @@
 #define DEFINE_CONFIG
 
+#include <vector>
+
 #include "Config.h"
 
 #include "skyline/utils/cpputils.hpp"
@@ -18,16 +20,24 @@ JsonWrapper JsonWrapper::operator[](const std::string &item) {
     return JsonWrapper(cJSON_GetObjectItem(inner, item.c_str()));
 }
 
-template<> int JsonWrapper::get<int>(const std::string &item) {
-    return static_cast<int>(cJSON_GetNumberValue((*this)[item].inner));
+template<> int JsonWrapper::get<int>() {
+    return static_cast<int>(cJSON_GetNumberValue(inner));
 }
 
-template<> size_t JsonWrapper::get<size_t>(const std::string &item) {
-    return static_cast<size_t>(cJSON_GetNumberValue((*this)[item].inner));
+template<> size_t JsonWrapper::get<size_t>() {
+    return static_cast<size_t>(cJSON_GetNumberValue(inner));
 }
 
-template<> char* JsonWrapper::get<char*>(const std::string &item) {
-    return cJSON_GetStringValue((*this)[item].inner);
+template<> char* JsonWrapper::get<char*>() {
+    return cJSON_GetStringValue(inner);
+}
+
+template<> std::vector<char*> JsonWrapper::get<std::vector<char*>>() {
+    size_t size = (size_t)cJSON_GetArraySize(inner);
+    auto ret = std::vector<char*>();
+    for (size_t i = 0; i < size; i++)
+        ret.push_back(JsonWrapper(cJSON_GetArrayItem(inner, i)).get<char*>());
+    return ret;
 }
 
 bool JsonWrapper::has(const std::string &item) {
@@ -57,6 +67,7 @@ void configInit() {
     free(contents);
 }
 
-template int JsonWrapper::get<int>(const std::string &item);
-template size_t JsonWrapper::get<size_t>(const std::string &item);
-template char *JsonWrapper::get<char*>(const std::string &item);
+template int JsonWrapper::get<int>();
+template size_t JsonWrapper::get<size_t>();
+template char *JsonWrapper::get<char*>();
+template std::vector<char*> JsonWrapper::get<std::vector<char*>>();

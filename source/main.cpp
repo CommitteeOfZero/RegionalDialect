@@ -729,7 +729,6 @@ uintptr_t MESrevTextSizePtr;
 uintptr_t MESrevTextPosPtr;
 uintptr_t MESrevDispPosPtr;
 uintptr_t MESrevTextColPtr;
-uintptr_t fontDrawModePtr;
 
 void handleMESrevDispInit(void) {
     MESrevDispInitImpl();
@@ -920,37 +919,86 @@ void loadWidths() {
 }
 
 void hookFunctions() {
-    MEStextDatNumPtr = retrievePointer(sigScan("game", "MEStextDatNumPtr"), -0xC);
-    MESngFontListTopNumPtr = retrievePointer(sigScan("game", "MESngFontListTopNumPtr"), 0x8);
-    MESngFontListLastNumPtr = retrievePointer(sigScan("game", "MESngFontListLastNumPtr"), 0x8);
-    MEStextFlPtr = retrievePointer(sigScan("game", "MEStextFlPtr"), 0xC);
-    MEStextPtr = retrievePointer(sigScan("game", "MEStextPtr"), 0x10);
-    MESngFontListLastPtr = retrievePointer(sigScan("game", "MESngFontListLastPtr"), 0x20);
-    MESngFontListTopPtr = retrievePointer(sigScan("game", "MESngFontListTopPtr"), 0x24);
-    ScrWorkPtr = retrievePointer(sigScan("game", "ScrWorkPtr"));
-    MesFontColorPtr = retrievePointer(sigScan("game", "MesFontColorPtr"), 0x18);
-    EPmaxPtr = retrievePointer(sigScan("game", "EPmaxPtr"));
+    uint32_t *SaveMenuGuide = (uint32_t*)(void*)sigScan("game", "SaveMenuGuide");
+    uint32_t buttonIds[] = { 0, 10010, 2, 10020, 6, 7, 10100, 1, 10000, 255 };
+    memcpy(&SaveMenuGuide[6 * 20], buttonIds, sizeof(buttonIds));
 
-    uintptr_t MESsetNGflagAddr = sigScan("game", "MESsetNGflag");
+    englishTipsHideBranch1 = sigScan("game", "englishTipsHideBranch1");
+    englishTipsShowBranch1 = sigScan("game", "englishTipsShowBranch1");
+    englishTipsHideBranch2 = sigScan("game", "englishTipsHideBranch2");
+    englishTipsShowBranch2 = sigScan("game", "englishTipsShowBranch2");
 
-    MEStextDatNumPtr = retrievePointer(MESsetNGflagAddr + 28, -0xC);
-    MESngFontListTopNumPtr = retrievePointer(MESsetNGflagAddr + 28, 0x8);
-    MESngFontListLastNumPtr = retrievePointer(MESsetNGflagAddr + 32, 0x8);
-    MEStextFlPtr = retrievePointer(MESsetNGflagAddr + 48, 0xC);
-    MEStextPtr = retrievePointer(MESsetNGflagAddr + 52, 0x10);
-    MESngFontListLastPtr = retrievePointer (MESsetNGflagAddr + 56, 0x20);
-    MESngFontListTopPtr = retrievePointer(MESsetNGflagAddr + 64, 0x24);
+    uintptr_t audioLoweringAddr = sigScan("game", "audioLoweringAddr");
+    uint32_t nop = 0xD503201F;
 
-    uintptr_t MESrevDispTextAddr = sigScan("game", "MESrevDispText");
-    uintptr_t SystemMenuDispAddress = sigScan("game", "SystemMenuDisp");
+    overwrite_u32(audioLoweringAddr,     nop);
+    overwrite_u32(audioLoweringAddr + 4, nop);
+
+    uintptr_t englishOnlyOffsetTable = sigScan("game", "englishOnlyOffsetTable");
+    skyline::logger::s_Instance->LogFormat("englishOnlyOffsetTable: 0x%08X\n", englishOnlyOffsetTable);
+    if (englishOnlyOffsetTable != 0xFFFFFF00) _memset(englishOnlyOffsetTable, 0, 640);
+
+    const std::vector<char *> widthCheckPatterns = config["gamedef"]["widthCheckPatterns"].get<std::vector<char*>>();
+    uint32_t branchFix = 0x3A5F43E8; 
+
+    int occur = 0;
+    for (const char *pattern : widthCheckPatterns) {
+        while (true) {
+            uintptr_t tentative =
+                FindPattern((unsigned char *)(uintptr_t)skyline::utils::g_MainTextAddr, (unsigned char *)skyline::utils::g_MainRodataAddr, pattern, (uintptr_t)skyline::utils::g_MainTextAddr, 0, occur);
+            if (tentative == 0) break;
+            overwrite_u32(tentative, branchFix);
+            occur++;
+        }
+        occur = 0;
+    }
+
+    //  fontAline
+    overwrite_ptr(sigScan("game", "fontAlinePtr"), &ourTable[0]);
+    // fontAline2
+    overwrite_ptr(sigScan("game", "fontAline2Ptr"), &ourTable[0]);
+
+    MEStextDatNumPtr = sigScan("game", "MEStextDatNumPtr");
+    MESngFontListTopNumPtr = sigScan("game", "MESngFontListTopNumPtr");
+    MESngFontListLastNumPtr = sigScan("game", "MESngFontListLastNumPtr");
+    MEStextFlPtr = sigScan("game", "MEStextFlPtr");
+    MEStextPtr = sigScan("game", "MEStextPtr");
+    MESngFontListLastPtr = sigScan("game", "MESngFontListLastPtr");
+    MESngFontListTopPtr = sigScan("game", "MESngFontListTopPtr");
+    ScrWorkPtr = sigScan("game", "ScrWorkPtr");
+    MesFontColorPtr = sigScan("game", "MesFontColorPtr");
+    EPmaxPtr = sigScan("game", "EPmaxPtr");
 
     MESrevTextPtr = sigScan("game", "MESrevTextPtr");
-    MESrevLineBufUsePtr = retrievePointer(MESrevDispTextAddr + 40, 20);
-    MESrevDispMaxPtr = retrievePointer(SystemMenuDispAddress + 0x778);
-    MESrevTextSizePtr = MESrevTextPtr + 0x493e0;
-    MESrevTextPosPtr = MESrevTextPtr + 0x186a0;
-    MESrevDispPosPtr = retrievePointer(MESrevDispTextAddr + 0x124);
-    MESrevTextColPtr = MESrevTextSizePtr + 0x30d40;
+    MESrevLineBufUsePtr = sigScan("game", "MESrevLineBufUsePtr");
+    MESrevDispMaxPtr = sigScan("game", "MESrevDispMaxPtr");
+    MESrevTextSizePtr = sigScan("game", "MESrevTextSizePtr");
+    MESrevTextPosPtr = sigScan("game", "MESrevTextPosPtr");
+    MESrevDispPosPtr = sigScan("game", "MESrevDispPosPtr");
+    MESrevTextColPtr = sigScan("game", "MESrevTextColPtr");
+    MESrevLineBufpPtr = sigScan("game", "MESrevLineBufpPtr");
+    MESrevDispLinePosPtr = sigScan("game", "MESrevDispLinePosPtr");
+    MESrevDispLinePosYPtr = sigScan("game", "MESrevDispLinePosYPtr");
+    MESrevLineBufSizePtr = sigScan("game", "MESrevLineBufSizePtr");
+    
+    OPTmenuModePtr = sigScan("game", "OPTmenuModePtr");
+    OPTmenuCurPtr = sigScan("game", "OPTmenuCurPtr");
+    OPTmenuPagePtr = sigScan("game", "OPTmenuPagePtr");
+    PADcustomPtr = sigScan("game", "PADcustomPtr");
+    PADrefPtr = sigScan("game", "PADrefPtr");
+    PADonePtr = sigScan("game", "PADonePtr");
+    SYSSEvolPtr = sigScan("game", "SYSSEvolPtr");
+    MesNameDispLenPtr = sigScan("game", "MesNameDispLenPtr");
+
+    uint8_t *OPTmenuMaxCur = (uint8_t*)(void*)sigScan("game", "OPTmenuMaxCurPtr");
+    OPTmenuMaxCur[4] = 4;
+
+    overwrite_u32(sigScan("game", "SkipModeFix"), 0x17FFFFB9);
+
+    overwrite_u32(sigScan("game", "DoZSelection1"), 0x17FFFF39);
+    overwrite_u32(sigScan("game", "DoZSelection2"), 0x17FFFFB0);
+
+    overwrite_u32(sigScan("game", "ShorcutMenuFix"), 0x52806E00);
 
     A64HookFunction(
         reinterpret_cast<void*>(sigScan("game", "GSLfontStretchF")),
@@ -977,7 +1025,7 @@ void hookFunctions() {
     );
 
     A64HookFunction(
-        reinterpret_cast<void*>(MESsetNGflagAddr),
+        reinterpret_cast<void*>(sigScan("game", "MESsetNGflag")),
         reinterpret_cast<void*>(handleMESsetNGflag),
         (void **)&MESsetNGflagImpl
     );
@@ -1025,7 +1073,7 @@ void hookFunctions() {
     );
     
     A64HookFunction(
-        reinterpret_cast<void*>(MESrevDispTextAddr),
+        reinterpret_cast<void*>(sigScan("game", "MESrevDispText")),
         reinterpret_cast<void*>(handleMESrevDispText),
         (void **)&MESrevDispTextImpl
     );
@@ -1148,106 +1196,8 @@ void skyline_main() {
     nn::ro::Initialize();
     A64HookFunction(reinterpret_cast<void*>(nn::ro::Initialize), reinterpret_cast<void*>(stub), NULL);
 
-    for (int i = 0; i < 8000; i++)
-        ourTable[i] = 32;
-
     uintptr_t code = skyline::utils::g_MainTextAddr;
-    const char *fontAlinePattern =                          "20111111";
-    const char *audioLoweringPattern =                      "187F0153";
-    const std::vector<const char *> widthCheckPatterns =    {"1F790571", "3F790571", "3F7D0571", "5F790571", "7F790571", "7F3D0671", "BF3D0671", "7F7D0571", "5F3D0671"};
-    const char *SaveMenuGuidePattern =                      "010000001027";
-
     codeCaves = skyline::utils::g_MainRodataAddr - 0xC30;
-    englishTipsHideBranch1 = code + 0x248a8;
-    englishTipsShowBranch1 = code + 0x248c0;
-    englishTipsHideBranch2 = code + 0x2499c;
-    englishTipsShowBranch2 = code + 0x249b4;
-
-    MESrevLineBufpPtr = code + 0x842f4c;
-    MESrevDispLinePosPtr = code + 0xa4a4d0;
-    MESrevDispLinePosYPtr = code + 0xa4b794;
-    MESrevLineBufSizePtr = code + 0x873c8c;
-    fontDrawModePtr = code + 0x16a3e8;
-    OPTmenuModePtr = code + 0x78cbcc;
-    OPTmenuCurPtr = code + 0x78cbd4;
-    OPTmenuPagePtr = code + 0x78cbd0;
-    PADcustomPtr = code + 0xa4e690;
-    PADrefPtr = code + 0x77eebc;
-    PADonePtr = code + 0x77ee94;
-    SYSSEvolPtr = code + 0x1a07e98;
-    MesNameDispLenPtr = code + 0xa49674;
-
-    uintptr_t OPTmenuCurMaxPtr = code + 0x16b194;
-    uint8_t *OPTmenuCurMax = (uint8_t*)(void*)OPTmenuCurMaxPtr;
-    OPTmenuCurMax[4] = 4;
-
-    uintptr_t fontAlineAddr = FindPattern((unsigned char*)skyline::utils::g_MainDataAddr, (unsigned char*)skyline::utils::g_MainBssAddr, fontAlinePattern, skyline::utils::g_MainDataAddr, 0, 0);
-    char fontAlineAddrStr[9];
-    sprintf(fontAlineAddrStr, "%08X", __builtin_bswap32(fontAlineAddr));
-    uintptr_t fontAlinePtr = FindPattern((unsigned char*)skyline::utils::g_MainDataAddr, (unsigned char *)skyline::utils::g_MainBssAddr, fontAlineAddrStr, skyline::utils::g_MainDataAddr, 0, 0);
-
-    uintptr_t fontAline2Addr = FindPattern((unsigned char*)skyline::utils::g_MainDataAddr, (unsigned char*)skyline::utils::g_MainBssAddr, fontAlinePattern, skyline::utils::g_MainDataAddr, 0, 1);
-    char fontAline2AddrStr[9];
-    sprintf(fontAline2AddrStr, "%08X", __builtin_bswap32(fontAline2Addr));
-    uintptr_t fontAline2Ptr = FindPattern((unsigned char*)skyline::utils::g_MainDataAddr, (unsigned char *)skyline::utils::g_MainBssAddr, fontAline2AddrStr, skyline::utils::g_MainDataAddr, 0, 0);
-
-    auto SaveMenuGuide = (uint32_t *)(void *)FindPattern((unsigned char*)skyline::utils::g_MainDataAddr, (unsigned char*)skyline::utils::g_MainBssAddr, SaveMenuGuidePattern, skyline::utils::g_MainDataAddr, 0, 0);
-
-    std::vector<uint32_t> buttonIds;
-
-    buttonIds.push_back(0);
-    buttonIds.push_back(10010);
-    buttonIds.push_back(2);
-    buttonIds.push_back(10020);
-    buttonIds.push_back(6);
-    buttonIds.push_back(7);
-    buttonIds.push_back(10100);
-    buttonIds.push_back(1);
-    buttonIds.push_back(10000);
-    buttonIds.push_back(255);
-
-    memcpy(&SaveMenuGuide[6 * 20], buttonIds.data(), buttonIds.size() * sizeof(uint32_t));
-
-    uintptr_t audioLoweringAddr = FindPattern((unsigned char *)code, (unsigned char *)skyline::utils::g_MainRodataAddr, audioLoweringPattern, skyline::utils::g_MainDataAddr, 0, 0);
-    uint32_t branchFix = 0x3A5F43E8;
-    uint32_t nop = 0xD503201F;
-   
-    int occur = 0;
-    for (const char *pattern : widthCheckPatterns) {
-        while (true) {
-            uintptr_t tentative = FindPattern((unsigned char *)code, (unsigned char *)skyline::utils::g_MainRodataAddr, pattern, code, 0, occur);
-            if (tentative == 0) break;
-            overwrite_u32(tentative, branchFix);
-            occur++;
-        }
-        occur = 0;
-    }
-
-    //  fontAline
-    overwrite_ptr(fontAlinePtr, &ourTable[0]);
-    // fontAline2
-    overwrite_ptr(fontAline2Ptr, &ourTable[0]);
-
-    uintptr_t englishOnlyOffsetTable1 = FindPattern((unsigned char*)(fontAline2Addr + 400), (unsigned char*)(fontAline2Addr + 400 + 8), "FFFFFF00", fontAline2Addr + 400, 0, 0);
-    if (englishOnlyOffsetTable1 == 0) {
-        for (int i = 0; i <= 80 * 2; i++) {
-            overwrite_u32(fontAline2Addr + 400 + (i * 4), 0x00000000);
-        }
-    }
-
-    overwrite_u32(audioLoweringAddr,     nop);
-    overwrite_u32(audioLoweringAddr + 4, nop);
-
-    // Skip fix
-    overwrite_u32(code + 0x437a8, 0x17FFFFB9);
-
-    // DoZ selection
-    overwrite_u32(code + 0x2bc88, 0x17FFFF39);
-    overwrite_u32(code + 0x2baac, 0x17FFFFB0);
-
-    // Fix shortcut bug
-    overwrite_u32(code + 0x2c140, 0x52806E00);
-
 }   
 
 extern "C" void skyline_init() {

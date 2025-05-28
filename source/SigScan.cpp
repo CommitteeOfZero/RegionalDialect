@@ -129,8 +129,8 @@ uintptr_t sigScanRaw(const char *category, const char* sigName) {
          << std::endl;
 
   JsonWrapper sig = config["gamedef"]["signatures"][category][sigName];
-  const char* pattern = sig.get<char*>("pattern");
-  size_t offset = sig.get<size_t>("offset");
+  const char* pattern = sig["pattern"].get<char*>();
+  size_t offset = sig["offset"].get<size_t>();
 
   logstr << pattern << std::endl;
 
@@ -140,9 +140,9 @@ uintptr_t sigScanRaw(const char *category, const char* sigName) {
   uintptr_t retval = FindPattern((unsigned char*)baseAddress,
                                  (unsigned char*)endAddress,
                                  pattern, baseAddress, offset,
-                                 sig.get<int>("occurrence"));
+                                 sig["occurrence"].get<int>());
 
-  if (retval != NULL) {
+  if (retval != 0) {
       logstr << " found at 0x" << std::hex << retval;
       skyline::logger::s_Instance->Log(logstr.str().c_str());
       return retval;
@@ -153,16 +153,15 @@ uintptr_t sigScanRaw(const char *category, const char* sigName) {
   return NULL;
 }
 
-
 uintptr_t sigScan(const char* category, const char* sigName) {
   if (!config["gamedef"]["signatures"][category].has(sigName)){
     skyline::logger::s_Instance->LogFormat("Signature for %s is missing!\n", sigName);
-    return NULL;
+    return 0;
   }
 
   uintptr_t raw = sigScanRaw(category, sigName);
   JsonWrapper sig = config["gamedef"]["signatures"][category][sigName];
   if (!sig.has("expr")) return raw;
   if (raw == 0) return raw;
-  return SigExprParser(sig.get<char*>("expr"), raw).eval();
+  return SigExprParser(sig["expr"].get<char*>(), raw).eval();
 }

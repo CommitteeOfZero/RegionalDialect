@@ -20,7 +20,7 @@ class JsonWrapper {
 
         JsonWrapper operator[](const std::string &item);
 
-        template<typename T> T get(const std::string &item);
+        template<typename T> T get();
         bool has(const std::string &item);
         void print();
 };

@@ -53,7 +53,7 @@ SigExprParser::SigExprParser(const std::string &input, uintptr_t ptr) : lexer(in
 uintptr_t SigExprParser::eval() {
     uintptr_t result = expression();
     if (lexer.getToken().type != End) {
-        skyline::logger::s_Instance->LogFormat("Parsing error in '%s': Expected EOL, got %s.\n", lexer.input, tokenType.find(lexer.getToken().type)->second.c_str());
+        skyline::logger::s_Instance->LogFormat("Parsing error in '%s': Expected EOL, got %s.\n", lexer.input.c_str(), tokenType.find(lexer.getToken().type)->second.c_str());
         std::exit(1);
     }
     return result;
@@ -90,7 +90,6 @@ uintptr_t SigExprParser::summand(bool onlyDereferable, bool allowComma) {
                 result = retrievePointer(result, offset);
                 token = lexer.getToken();
                 lexer.nextToken();
-                break;
             } 
             
             if (token.type != RParen) break;
@@ -107,6 +106,6 @@ uintptr_t SigExprParser::summand(bool onlyDereferable, bool allowComma) {
             break;
     }
 
-    skyline::logger::s_Instance->LogFormat("Parsing error in '%s': Expected EOL, got %s.\n", lexer.input, tokenType.find(lexer.getToken().type)->second.c_str());
+    skyline::logger::s_Instance->LogFormat("Parsing error in '%s': Expected EOL, got %s.\n", lexer.input.c_str(), tokenType.find(lexer.getToken().type)->second.c_str());
     std::exit(1);
 }
