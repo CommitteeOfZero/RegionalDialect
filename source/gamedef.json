@@ -124,7 +124,8 @@
             "SaveMenuGuide": {
                 "occurrence": 0,
                 "offset": 0,
-                "pattern": "01 00 00 00 10 27"
+                "pattern": "FF 03 02 D1 E8 0B 00 FD FD 7B 02 A9 FD 83 00 91 FC 6F 03 A9 FA 67 04 A9 F8 5F 05 A9 F6 57 06 A9 F4 4F 07 A9 1F",
+                "expr": "*(ptr + 0xAC, 8)"
             },
             "englishTipsHideBranch1": {
                 "occurrence": 0,
