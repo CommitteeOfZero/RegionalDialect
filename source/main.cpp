@@ -935,8 +935,7 @@ void hookFunctions() {
     overwrite_u32(audioLoweringAddr + 4, nop);
 
     uintptr_t englishOnlyOffsetTable = sigScan("game", "englishOnlyOffsetTable");
-    skyline::logger::s_Instance->LogFormat("englishOnlyOffsetTable: 0x%08X\n", englishOnlyOffsetTable);
-    if (englishOnlyOffsetTable != 0xFFFFFF00) _memset(englishOnlyOffsetTable, 0, 640);
+    if (*(uint32_t*)(void*)englishOnlyOffsetTable != 0xFFFFFF00) _memset(englishOnlyOffsetTable, 0, 640);
 
     const std::vector<char *> widthCheckPatterns = config["gamedef"]["widthCheckPatterns"].get<std::vector<char*>>();
     uint32_t branchFix = 0x3A5F43E8; 
