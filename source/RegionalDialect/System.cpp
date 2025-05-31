@@ -130,25 +130,36 @@ void Init() {
     PADonePtr = (uint32_t*)rd::hook::SigScan("game", "PADonePtr");
     SYSSEvolPtr = (uint32_t*)rd::hook::SigScan("game", "SYSSEvolPtr");
 
-    uint32_t *SaveMenuGuide = (uint32_t*)rd::hook::SigScan("game", "SaveMenuGuide");
-    uint32_t buttonIds[] = { 0, 10010, 2, 10020, 6, 7, 10100, 1, 10000, 255 };
-    ::memcpy(&SaveMenuGuide[6 * 20], buttonIds, sizeof(buttonIds));
+    if (rd::config::config["gamedef"]["signatures"]["game"].has("SaveMenuGuide")) {
+        uint32_t *SaveMenuGuide = (uint32_t*)rd::hook::SigScan("game", "SaveMenuGuide");
+        uint32_t buttonIds[] = { 0, 10010, 2, 10020, 6, 7, 10100, 1, 10000, 255 };
+        ::memcpy(&SaveMenuGuide[6 * 20], buttonIds, sizeof(buttonIds));
+    }
 
-    uintptr_t audioLoweringAddr = rd::hook::SigScan("game", "audioLoweringAddr");
-    uint32_t nop = 0xD503201F;
+    if (rd::config::config["gamedef"]["signatures"]["game"].has("audioLoweringAddr")) {
+        uintptr_t audioLoweringAddr = rd::hook::SigScan("game", "audioLoweringAddr");
+        uint32_t nop = 0xD503201F;
 
-    rd::utils::overwrite_u32(audioLoweringAddr,     nop);
-    rd::utils::overwrite_u32(audioLoweringAddr + 4, nop);
+        rd::utils::overwrite_u32(audioLoweringAddr,     nop);
+        rd::utils::overwrite_u32(audioLoweringAddr + 4, nop);
+    }
 
-    uint8_t *OPTmenuMaxCur = (uint8_t*)rd::hook::SigScan("game", "OPTmenuMaxCur");
-    OPTmenuMaxCur[4] = 4;
+    if (rd::config::config["gamedef"]["signatures"]["game"].has("OPTmenuMaxCur")) {
+        uint8_t *OPTmenuMaxCur = (uint8_t*)rd::hook::SigScan("game", "OPTmenuMaxCur");
+        OPTmenuMaxCur[4] = 4;
+    }
+    
+    if (rd::config::config["gamedef"]["signatures"]["game"].has("SkipModeFix"))
+        rd::utils::overwrite_u32(rd::hook::SigScan("game", "SkipModeFix"), 0x17FFFFB9);
 
-    rd::utils::overwrite_u32(rd::hook::SigScan("game", "SkipModeFix"), 0x17FFFFB9);
+    if (rd::config::config["gamedef"]["signatures"]["game"].has("DoZSelection1"))
+        rd::utils::overwrite_u32(rd::hook::SigScan("game", "DoZSelection1"), 0x17FFFF39);
 
-    rd::utils::overwrite_u32(rd::hook::SigScan("game", "DoZSelection1"), 0x17FFFF39);
-    rd::utils::overwrite_u32(rd::hook::SigScan("game", "DoZSelection2"), 0x17FFFFB0);
-
-    rd::utils::overwrite_u32(rd::hook::SigScan("game", "ShorcutMenuFix"), 0x52806E00);
+    if (rd::config::config["gamedef"]["signatures"]["game"].has("DoZSelection2"))
+        rd::utils::overwrite_u32(rd::hook::SigScan("game", "DoZSelection2"), 0x17FFFFB0);
+    
+    if (rd::config::config["gamedef"]["signatures"]["game"].has("ShortcutMenuFix"))
+        rd::utils::overwrite_u32(rd::hook::SigScan("game", "ShorcutMenuFix"), 0x52806E00);
 
     HOOK_FUNC(game, GSLflatRectF);
     HOOK_FUNC(game, SetFlag);

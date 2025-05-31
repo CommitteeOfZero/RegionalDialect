@@ -635,27 +635,31 @@ void Init() {
     englishTipsShowBranch2 = rd::hook::SigScan("game", "englishTipsShowBranch2");
 
     uintptr_t englishOnlyOffsetTable = rd::hook::SigScan("game", "englishOnlyOffsetTable");
-    if (*(uint32_t*)englishOnlyOffsetTable != 0xFFFFFF00) rd::utils::memset(englishOnlyOffsetTable, 0, 640);
+    if (englishOnlyOffsetTable != 0 && *(uint32_t*)englishOnlyOffsetTable != 0xFFFFFF00)
+        rd::utils::memset(englishOnlyOffsetTable, 0, 640);
 
-    const std::vector<char *> widthCheckPatterns = rd::config::config["gamedef"]["widthCheckPatterns"].get<std::vector<char*>>();
-    uint32_t branchFix = 0x3A5F43E8; 
+    if (rd::config::config["gamedef"].has("widthCheckPatterns")) {
+        const std::vector<char *> widthCheckPatterns = rd::config::config["gamedef"]["widthCheckPatterns"].get<std::vector<char*>>();
+        uint32_t branchFix = 0x3A5F43E8; 
 
-    int occur = 0;
-    for (const char *pattern : widthCheckPatterns) {
-        while (true) {
-            uintptr_t tentative =
-                rd::hook::FindPattern((unsigned char *)(uintptr_t)skyline::utils::g_MainTextAddr, (unsigned char *)skyline::utils::g_MainRodataAddr, pattern, (uintptr_t)skyline::utils::g_MainTextAddr, 0, occur);
-            if (tentative == 0) break;
-            rd::utils::overwrite_u32(tentative, branchFix);
-            occur++;
+        int occur = 0;
+        for (const char *pattern : widthCheckPatterns) {
+            while (true) {
+                uintptr_t tentative =
+                    rd::hook::FindPattern((unsigned char *)(uintptr_t)skyline::utils::g_MainTextAddr, (unsigned char *)skyline::utils::g_MainRodataAddr, pattern, (uintptr_t)skyline::utils::g_MainTextAddr, 0, occur);
+                if (tentative == 0) break;
+                rd::utils::overwrite_u32(tentative, branchFix);
+                occur++;
+            }
+            occur = 0;
         }
-        occur = 0;
     }
 
-    // fontAline
-    rd::utils::overwrite_ptr(rd::hook::SigScan("game", "fontAlinePtr"), &ourTable[0]);
-    // fontAline2
-    rd::utils::overwrite_ptr(rd::hook::SigScan("game", "fontAline2Ptr"), &ourTable[0]);
+    if (rd::config::config["gamedef"]["signatures"]["game"].has("fontAlinePtr"))
+        rd::utils::overwrite_ptr(rd::hook::SigScan("game", "fontAlinePtr"), &ourTable[0]);
+
+    if (rd::config::config["gamedef"]["signatures"]["game"].has("fontAline2Ptr"))
+        rd::utils::overwrite_ptr(rd::hook::SigScan("game", "fontAline2Ptr"), &ourTable[0]);
 
     HOOK_FUNC(game, GSLfontStretchF);
     HOOK_FUNC(game, GSLfontStretchWithMaskF);
