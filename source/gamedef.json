@@ -152,7 +152,7 @@
             },
             "audioLoweringAddr": {
                 "occurrence": 0,
-                "offset": 2212,
+                "offset": 0,
                 "pattern": "18 7F 01 53"
             },
             "MEStextDatNumPtr": {
