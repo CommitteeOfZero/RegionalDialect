@@ -46,7 +46,7 @@ namespace nex {
         class Socket {
             virtual void Open(nn::nex::TransportProtocol::Type);
             virtual void Close();
-            virtual void Bind(ushort&);
+            virtual void Bind(unsigned short&);
             virtual void RecvFrom(uchar*, ulong, InetAddress*, ulong*, nn::nex::SocketDriver::_SocketFlag);
             virtual void SendTo(uchar const*, ulong, nn::nex::SocketDriver::InetAddress const&, ulong*);
         };

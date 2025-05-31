@@ -1,15 +1,17 @@
-#ifndef __CONFIG_H__
-#define __CONFIG_H__
+#pragma once
+
+#ifdef CONFIG_IMPLEMENTATION
+#define CONFIG_GLOBAL
+#else
+#define CONFIG_GLOBAL extern
+#endif
 
 #include <string>
 
 #include "cJSON.h"
 
-#ifdef DEFINE_CONFIG
-#define CONFIG_GLOBAL
-#else
-#define CONFIG_GLOBAL extern
-#endif
+namespace rd {
+namespace config {
 
 class JsonWrapper {
     private:
@@ -27,6 +29,7 @@ class JsonWrapper {
 
 CONFIG_GLOBAL JsonWrapper config;
 
-void configInit();
+void Init();
 
-#endif  // !__CONFIG_H__
+}  // namespace config
+}  // namespace rd

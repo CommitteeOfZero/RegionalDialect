@@ -4,9 +4,12 @@
 #include "skyline/inlinehook/controlledpages.hpp"
 #include "skyline/logger/StdoutLogger.hpp"
 
-#include "MemUtils.h"
+#include "RegionalDialect/Utils.h"
 
 extern uintptr_t codeCaves;
+
+namespace rd {
+namespace utils {
 
 uint32_t get_u32(uintptr_t address) {
     return *(uint32_t *)address;
@@ -29,12 +32,12 @@ void overwrite_u32(uintptr_t address, uint32_t value) {
     control.unclaim();
 }
 
-void _memset(uintptr_t address, uchar value, size_t size) {
+void memset(uintptr_t address, int8_t value, size_t size) {
     skyline::inlinehook::ControlledPages control((void *)address, size);
     control.claim();
 
     uchar *rw = (uchar *)control.rw;
-    std::memset(rw, value, size);
+    ::memset(rw, value, size);
     __flush_cache((void *)address, size);
 
     control.unclaim();
@@ -87,3 +90,6 @@ uintptr_t retrievePointer(uint64_t adrp_addr, uint64_t ldr_offset) {
     
     return pageAddr + offsetFromPageStart;
 }
+
+}  // namespace utils
+}  // namespace rd

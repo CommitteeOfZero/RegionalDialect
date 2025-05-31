@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "skyline/efl/service.hpp"
 
 #include "skyline/logger/Logger.hpp"

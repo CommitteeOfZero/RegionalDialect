@@ -1,54 +1,56 @@
-#define DEFINE_CONFIG
 
 #include <vector>
-
-#include "Config.h"
 
 #include "skyline/utils/cpputils.hpp"
 #include "skyline/logger/StdoutLogger.hpp"
 
+#define CONFIG_IMPLEMENTATION 
+#include "RegionalDialect/Config.h"
+
 extern std::string RomMountPath;
 
+namespace rd {
+namespace config {
 
 JsonWrapper::JsonWrapper() {
-    inner = cJSON_CreateObject();
+    inner = ::cJSON_CreateObject();
 }
 
 JsonWrapper::JsonWrapper(cJSON *inner) : inner(inner) {}
 
 JsonWrapper JsonWrapper::operator[](const std::string &item) {
-    return JsonWrapper(cJSON_GetObjectItem(inner, item.c_str()));
+    return JsonWrapper(::cJSON_GetObjectItem(inner, item.c_str()));
 }
 
 template<> int JsonWrapper::get<int>() {
-    return static_cast<int>(cJSON_GetNumberValue(inner));
+    return static_cast<int>(::cJSON_GetNumberValue(inner));
 }
 
 template<> size_t JsonWrapper::get<size_t>() {
-    return static_cast<size_t>(cJSON_GetNumberValue(inner));
+    return static_cast<size_t>(::cJSON_GetNumberValue(inner));
 }
 
 template<> char* JsonWrapper::get<char*>() {
-    return cJSON_GetStringValue(inner);
+    return ::cJSON_GetStringValue(inner);
 }
 
 template<> std::vector<char*> JsonWrapper::get<std::vector<char*>>() {
-    size_t size = (size_t)cJSON_GetArraySize(inner);
+    size_t size = (size_t)::cJSON_GetArraySize(inner);
     auto ret = std::vector<char*>();
     for (size_t i = 0; i < size; i++)
-        ret.push_back(JsonWrapper(cJSON_GetArrayItem(inner, i)).get<char*>());
+        ret.push_back(JsonWrapper(::cJSON_GetArrayItem(inner, i)).get<char*>());
     return ret;
 }
 
 bool JsonWrapper::has(const std::string &item) {
-    return cJSON_HasObjectItem(inner, item.c_str()) == 1;
+    return ::cJSON_HasObjectItem(inner, item.c_str()) == 1;
 }
 
 void JsonWrapper::print() {
-    skyline::logger::s_Instance->LogFormat("%s\n", cJSON_Print(inner));
+    skyline::logger::s_Instance->LogFormat("%s\n", ::cJSON_Print(inner));
 }
 
-void configInit() {
+void Init() {
     char *contents;
     Result rc = skyline::utils::readEntireFile(RomMountPath + "/system/gamedef.json", (void**)(&contents), NULL);
     
@@ -59,8 +61,8 @@ void configInit() {
     
     skyline::logger::s_Instance->Log("Successfully loaded gamedef.json\n");
     
-    cJSON *inner = cJSON_CreateObject();
-    cJSON_AddItemToObject(inner, "gamedef", cJSON_Parse(contents));
+    cJSON *inner = ::cJSON_CreateObject();
+    ::cJSON_AddItemToObject(inner, "gamedef", ::cJSON_Parse(contents));
 
     config = JsonWrapper(inner);
 
@@ -71,3 +73,6 @@ template int JsonWrapper::get<int>();
 template size_t JsonWrapper::get<size_t>();
 template char *JsonWrapper::get<char*>();
 template std::vector<char*> JsonWrapper::get<std::vector<char*>>();
+
+}  // namespace config
+}  // namespace rd
