@@ -1,0 +1,53 @@
+name: regionaldialect-patch-600
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers on version tags
+    branches:
+      - '**'  # Triggers on all branches
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest 
+    container: docker.io/devkitpro/devkita64
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Build the project
+        run: make
+
+      - name: Rename output
+        run: |
+          mv RegionalDialect600.nso subsdk9
+
+      - name: Create Github Artifact
+        uses: actions/upload-artifact@v4.1.0
+        with:
+          name: subsdk9
+          path: subsdk9
+
+      - name: Get Next Version
+        id: semver
+        uses: ietf-tools/semver-action@v1
+        if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags') || github.ref_name == 'master')
+        with:
+          token: ${{ github.token }}
+          branch: master
+          fallbackTag: 0.0.0
+          patchAll: true
+          noVersionBumpBehavior: patch
+          noNewCommitBehavior: warn
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: github.event_name == 'push' && ((startsWith(github.ref, 'refs/tags') || github.ref_name == 'master'))
+        with:
+          files: |
+            subsdk9
+          tag_name: ${{ steps.semver.outputs.next }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
