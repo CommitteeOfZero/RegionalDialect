@@ -1,4 +1,4 @@
-name: regionaldialect-patch-600
+name: RegionalDialect
 on:
   push:
     tags:
@@ -16,6 +16,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: true
+          fetch-depth: '0'
 
       - name: Build the project
         run: make
@@ -31,16 +32,13 @@ jobs:
           path: subsdk9
 
       - name: Get Next Version
-        id: semver
-        uses: ietf-tools/semver-action@v1
+        id: getver
+        uses: anothrNick/github-tag-action@v1
         if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags') || github.ref_name == 'master')
-        with:
-          token: ${{ github.token }}
-          branch: master
-          fallbackTag: 0.0.0
-          patchAll: true
-          noVersionBumpBehavior: patch
-          noNewCommitBehavior: warn
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TAG_PREFIX: v
+          DEFAULT_BUMP: patch
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -48,6 +46,6 @@ jobs:
         with:
           files: |
             subsdk9
-          tag_name: ${{ steps.semver.outputs.next }}
+          tag_name: ${{ steps.getver.outputs.new_tag }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
