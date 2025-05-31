@@ -192,6 +192,7 @@ void processSc3TokenList(int xOffset, int yOffset,int lineLength,
                     break;
                 case 0x1E:
                     sc3string++;
+                    // [[fallthrough]];
                 case 0x1F:
                     sc3string++;
                     break;
@@ -349,9 +350,8 @@ void HandleTipsDataInit(ulong thread, unsigned short *addr1, unsigned short *add
 }
 
 void HandleMESsetNGflag(int nameNewline, int rubyEnabled) {
-
     auto isNGtop = [](unsigned short glyph)->bool {
-        for (int i = 0; i < *MESngFontListTopNumPtr; i++) {
+        for (uint32_t i = 0; i < *MESngFontListTopNumPtr; i++) {
             if (MESngFontListTop[i] == glyph)
                     return true;
         }
@@ -359,7 +359,7 @@ void HandleMESsetNGflag(int nameNewline, int rubyEnabled) {
     };
 
     auto isNGlast = [](unsigned short glyph)->bool {
-        for (int i = 0; i < *MESngFontListLastNumPtr; i++) {
+        for (uint32_t i = 0; i < *MESngFontListLastNumPtr; i++) {
             if (MESngFontListLast[i] == glyph)
                 return true;
         }
@@ -370,7 +370,7 @@ void HandleMESsetNGflag(int nameNewline, int rubyEnabled) {
         return glyph < 0x8000 && !isNGtop(glyph) && !isNGlast(glyph);
     };
 
-    auto nextWord = [&isLetter](int &pos)->void {
+    auto nextWord = [&isLetter](uint32_t &pos)->void {
         int wordLen = 0;
         while (pos < *MEStextDatNumPtr && isLetter(MEStext[pos])) {
             MEStextFl[pos] = wordLen == 0 ? 0x0A : 0x0B;
@@ -381,7 +381,7 @@ void HandleMESsetNGflag(int nameNewline, int rubyEnabled) {
 
 	int processingRuby = 0;
 	int processingRubyText = 0;
-    int pos = 0;
+    uint32_t pos = 0;
 
     const uint16_t nameStart = 0x8001;
     const uint16_t nameEnd = 0x8002;
@@ -451,12 +451,12 @@ void HandleMESsetNGflag(int nameNewline, int rubyEnabled) {
 
     int lastLetter = 0;
 
-    for (int i = 0; i < *MEStextDatNumPtr; i++) {
+    for (uint32_t i = 0; i < *MEStextDatNumPtr; i++) {
         if (MEStextFl[i] == 0x0B || MEStextFl[i] == 0x09) {
             lastLetter = i;
         }
     }
-    for (int i = lastLetter; i < *MEStextDatNumPtr; i++) {
+    for (uint32_t i = lastLetter; i < *MEStextDatNumPtr; i++) {
         if (MEStextFl[i] != 0x07) {
             MEStextFl[i] = 0x0B;
         }

@@ -235,7 +235,7 @@ uintptr_t FindPattern(const unsigned char* dataStart,
                       uintptr_t baseAddress, size_t offset, int occurrence) {
     // Build vectored pattern..
     vector<PatternByte> patterndata;
-    if (!TransformPattern(pszPattern, patterndata)) return NULL;
+    if (!TransformPattern(pszPattern, patterndata)) return 0;
 
     // The result count for multiple results..
     int resultCount = 0;
@@ -259,7 +259,7 @@ uintptr_t FindPattern(const unsigned char* dataStart,
         break;
     }
 
-    return NULL;
+    return 0;
 }
 
 uintptr_t SigScanRaw(const char *pattern, size_t offset, int occurrence) {
@@ -279,7 +279,7 @@ uintptr_t SigScanRaw(const char *pattern, size_t offset, int occurrence) {
     }
 
     skyline::logger::s_Instance->Log(" not found!\n");
-    return NULL;
+    return 0;
 }
 
 uintptr_t SigScan(const char* category, const char* sigName) {
@@ -318,7 +318,7 @@ std::vector<uintptr_t> SigScanExhaust(const char *category, const char *sigName)
 }
 
 
-std::vector<uintptr_t> SigScanArray(const char *category, const char *sigName, bool exhaust = false) {
+std::vector<uintptr_t> SigScanArray(const char *category, const char *sigName, bool exhaust) {
     auto ret = std::vector<uintptr_t>();
 
     if (!rd::config::config["gamedef"]["signatures"][category].has(sigName)){

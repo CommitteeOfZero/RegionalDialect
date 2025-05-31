@@ -92,7 +92,7 @@ typedef struct CmifResponse {
 } CmifResponse;
 
 NX_CONSTEXPR void* cmifGetAlignedDataStart(u32* data_words, void* base) {
-    intptr_t data_start = ((u8*)data_words - (u8*)base + 15) & ~15;
+    intptr_t data_start = ((u8*)(void*)data_words - (u8*)(void*)base + 15) & ~15;
     return (u8*)base + data_start;
 }
 

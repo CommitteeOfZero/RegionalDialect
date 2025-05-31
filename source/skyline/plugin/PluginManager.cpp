@@ -207,7 +207,7 @@ namespace plugin {
         const PluginInfo* ret = nullptr;
         for (auto& plugin : m_pluginInfos) {
             void* module_start = (void*)plugin.Module.ModuleObject->module_base;
-            void* module_end = module_start + plugin.Size;
+            void* module_end = (void*)((uintptr_t)module_start + (uintptr_t)plugin.Size);
             if (module_start < addr && addr < module_end) {
                 ret = &plugin;
                 break;
@@ -225,6 +225,6 @@ void get_plugin_addresses(const void* internal_addr, void** start, void** end) {
         *start = *end = nullptr;
     else {
         *start = (void*)info->Module.ModuleObject->module_base;
-        *end = *start + info->Size;
+        *end = (void*)((uintptr_t)*start + (uintptr_t)info->Size);
     }
 }
