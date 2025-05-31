@@ -1,4 +1,4 @@
-name: chn-switch-patch
+name: regionaldialect-patch-600
 on:
   push:
     tags:
@@ -22,7 +22,7 @@ jobs:
 
       - name: Rename output
         run: |
-          mv chn-switch-patch600.nso subsdk9
+          mv RegionalDialect600.nso subsdk9
 
       - name: Create Github Artifact
         uses: actions/upload-artifact@v4.1.0
