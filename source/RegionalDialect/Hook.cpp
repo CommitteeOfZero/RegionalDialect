@@ -262,13 +262,7 @@ uintptr_t FindPattern(const unsigned char* dataStart,
     return NULL;
 }
 
-uintptr_t SigScanRaw(const char *category, const char* sigName) {
-    skyline::logger::s_Instance->LogFormat("SigScan: looking for %s/%s...\n", category, sigName);
-
-    rd::config::JsonWrapper sig = rd::config::config["gamedef"]["signatures"][category][sigName];
-    const char* pattern = sig["pattern"].get<char*>();
-    size_t offset = sig["offset"].get<size_t>();
-
+uintptr_t SigScanRaw(const char *pattern, size_t offset, int occurrence) {
     skyline::logger::s_Instance->Log(pattern);
 
     uintptr_t baseAddress = skyline::utils::g_MainTextAddr;
@@ -277,7 +271,7 @@ uintptr_t SigScanRaw(const char *category, const char* sigName) {
     uintptr_t retval = FindPattern((unsigned char*)baseAddress,
                                     (unsigned char*)endAddress,
                                     pattern, baseAddress, offset,
-                                    sig["occurrence"].get<int>());
+                                    occurrence);
 
     if (retval != 0) {
         skyline::logger::s_Instance->LogFormat(" found at 0x%08X!\n", retval);
@@ -293,14 +287,59 @@ uintptr_t SigScan(const char* category, const char* sigName) {
         skyline::logger::s_Instance->LogFormat("Signature for %s is missing!\n", sigName);
         return 0;
     }
+    skyline::logger::s_Instance->LogFormat("SigScan: looking for %s/%s...\n", category, sigName);
 
-    uintptr_t raw = SigScanRaw(category, sigName);
     rd::config::JsonWrapper sig = rd::config::config["gamedef"]["signatures"][category][sigName];
+    uintptr_t raw = SigScanRaw(sig["pattern"].get<char*>(), sig["offset"].get<size_t>(), sig["occurrence"].get<int>());
+    
     if (!sig.has("expr")) return raw;
     if (raw == 0) return raw;
     return SigExprParser(sig["expr"].get<char*>(), raw).eval();
 }
 
+std::vector<uintptr_t> SigScanExhaust(const char *category, const char *sigName) {
+    auto ret = std::vector<uintptr_t>();
+
+    if (!rd::config::config["gamedef"]["signatures"][category].has(sigName)){
+        skyline::logger::s_Instance->LogFormat("Signature for %s is missing!\n", sigName);
+    }
+
+    skyline::logger::s_Instance->LogFormat("SigScan: looking for %s/%s...\n", category, sigName);
+
+    rd::config::JsonWrapper sig = rd::config::config["gamedef"]["signatures"][category][sigName];
+
+    uintptr_t raw;
+    int occur = 0;
+    while ((raw = SigScanRaw(sig["pattern"].get<char*>(), 0, occur++)) != 0) {
+        ret.push_back(raw);
+    }
+    
+    return ret;
+}
+
+
+std::vector<uintptr_t> SigScanArray(const char *category, const char *sigName, bool exhaust = false) {
+    auto ret = std::vector<uintptr_t>();
+
+    if (!rd::config::config["gamedef"]["signatures"][category].has(sigName)){
+        skyline::logger::s_Instance->LogFormat("Signature for %s is missing!\n", sigName);
+    }
+
+    skyline::logger::s_Instance->LogFormat("SigScan: looking for %s/%s...\n", category, sigName);
+
+    rd::config::JsonWrapper sig = rd::config::config["gamedef"]["signatures"][category][sigName];
+
+    for (auto pattern : sig["patterns"].get<std::vector<char*>>()) {
+        uintptr_t raw;
+        int occur = 0;
+        while ((raw = SigScanRaw(pattern, 0, occur++)) != 0) {
+            ret.push_back(raw);
+            if (!exhaust) break;
+        }
+    }
+    
+    return ret;
+}
 
 }  // namespace hook
 }  // namespace rd

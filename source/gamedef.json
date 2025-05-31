@@ -1,6 +1,5 @@
 {
     "__schema_version": 1,
-    "widthCheckPatterns": ["1F 79 05 71", "3F 79 05 71", "3F 7D 05 71", "5F 79 05 71", "7F 79 05 71", "7F 3D 06 71", "BF 3D 06 71", "7F 7D 05 71", "5F 3D 06 71"],
     "signatures": {
         "game": {
             "GSLfontStretchF": {
@@ -102,6 +101,10 @@
                 "occurrence": 0,
                 "offset": 0,
                 "pattern": "FD 7B BC A9 F7 0B 00 F9 FD 03 00 91 F6 57 02 A9 F4 4F 03 A9 E8 FF 9F"
+            },
+
+            "widthCheck": {
+                "patterns": ["1F 79 05 71", "3F 79 05 71", "3F 7D 05 71", "5F 79 05 71", "7F 79 05 71", "7F 3D 06 71", "BF 3D 06 71", "7F 7D 05 71", "5F 3D 06 71"]
             },
             "fontAlinePtr": {
                 "occurrence": 0,

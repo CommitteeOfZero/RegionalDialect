@@ -27,5 +27,9 @@ uintptr_t FindPattern(const uint8_t *dataStart, const uint8_t *dataEnd,
 
 uintptr_t SigScan(const char* category, const char* sigName);
 
+std::vector<uintptr_t> SigScanExhaust(const char *category, const char *sigName);
+
+std::vector<uintptr_t> SigScanArray(const char *category, const char *sigName, bool exhaust = false);
+
 }  // namespace hook
 }  // namespace rd

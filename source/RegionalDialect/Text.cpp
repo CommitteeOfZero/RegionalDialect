@@ -638,21 +638,10 @@ void Init() {
     if (englishOnlyOffsetTable != 0 && *(uint32_t*)englishOnlyOffsetTable != 0xFFFFFF00)
         rd::utils::memset(englishOnlyOffsetTable, 0, 640);
 
-    if (rd::config::config["gamedef"].has("widthCheckPatterns")) {
-        const std::vector<char *> widthCheckPatterns = rd::config::config["gamedef"]["widthCheckPatterns"].get<std::vector<char*>>();
+    if (rd::config::config["gamedef"]["signatures"]["game"].has("widthCheck")) {
         uint32_t branchFix = 0x3A5F43E8; 
-
-        int occur = 0;
-        for (const char *pattern : widthCheckPatterns) {
-            while (true) {
-                uintptr_t tentative =
-                    rd::hook::FindPattern((unsigned char *)(uintptr_t)skyline::utils::g_MainTextAddr, (unsigned char *)skyline::utils::g_MainRodataAddr, pattern, (uintptr_t)skyline::utils::g_MainTextAddr, 0, occur);
-                if (tentative == 0) break;
-                rd::utils::overwrite_u32(tentative, branchFix);
-                occur++;
-            }
-            occur = 0;
-        }
+        for (uintptr_t widthCheck : rd::hook::SigScanArray("game", "widthCheck", true))
+            rd::utils::overwrite_u32(widthCheck, branchFix);
     }
 
     if (rd::config::config["gamedef"]["signatures"]["game"].has("fontAlinePtr"))
