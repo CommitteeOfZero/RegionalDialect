@@ -37,8 +37,8 @@ file(GLOB_RECURSE SOURCES_CXX ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_D
 file(GLOB_RECURSE LOCAL_LIBRARIES ${PROJECT_SOURCE_DIR}/libs/*.a)
 
 add_library(cjson STATIC
-  ${PROJECT_SOURCE_DIR}/vendor/cjson/cJSON.c
-  ${PROJECT_SOURCE_DIR}/vendor/cjson/cJSON.h
+  ${PROJECT_SOURCE_DIR}/vendor/cJSON/cJSON.c
+  ${PROJECT_SOURCE_DIR}/vendor/cJSON/cJSON.h
 )
 
 set_target_properties(cjson PROPERTIES
