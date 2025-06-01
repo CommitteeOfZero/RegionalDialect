@@ -1,50 +1,17 @@
-# TODO (Khangaroo): Make this process a lot less hacky (no, export did not work)
-# See MakefileNSO
+.PHONY: all clean
 
-.PHONY: all clean skyline send
+FTP_USERNAME ?= crafty # set these fields to what your ftp server uses on switch (if it has one)
+FTP_PASSWORD ?= boss
 
-CROSSVER ?= 600
+LOGGER_IP ?= "10.0.0.224" # set this to the IP of the machine that is hosting the tcpServer.py script found in scripts/ (or any other ftp logging script)
+FTP_IP ?= 10.0.0.225 # set this to your switches IP address in order to send built mod over to it on compile
 
-PYTHON := python3
-ifeq (, $(shell which python3))
-	# if no python3 alias, fall back to `python` and hope it's py3
-	PYTHON   := python
-endif
-
-NAME 			:= $(shell basename $(CURDIR))
-NAME_LOWER		:= $(shell echo $(NAME) | tr A-Z a-z)
-PATCH_PREFIX	:= $(NAME_LOWER)_patch_
-PATCH 			:= $(PATCH_PREFIX)$(CROSSVER)
-
-PATCH_DIR 		:= patches
-SCRIPTS_DIR		:= scripts
-BUILD_DIR 		:= build$(CROSSVER)
-
-CONFIGS 		:= $(PATCH_DIR)/configs
-CROSS_CONFIG 	:= $(CONFIGS)/$(CROSSVER).config
-
-MAPS 			:= $(PATCH_DIR)/maps
-CROSS_MAPS 		:= $(MAPS)/$(CROSSVER)
-NAME_MAP 		:= $(BUILD_DIR)/$(NAME)$(CROSSVER).map
-
-GEN_PATCH		:= $(SCRIPTS_DIR)/genPatch.py
-SEND_PATCH		:= $(SCRIPTS_DIR)/sendPatch.py
-
-MAKE_NSO		:= nso.mk
-
-all: skyline
-
-skyline:
-	$(MAKE) all -f $(MAKE_NSO) MAKE_NSO=$(MAKE_NSO) CROSSVER=$(CROSSVER) BUILD=$(BUILD_DIR) TARGET=$(NAME)$(CROSSVER)
-	#$(MAKE) $(PATCH)/*.ips
-
-$(PATCH)/*.ips: $(PATCH_DIR)/*.slpatch $(CROSS_CONFIG) $(CROSS_MAPS)/*.map $(NAME_MAP) 
-	@rm -f $(PATCH)/*.ips
-	$(PYTHON) $(GEN_PATCH) $(CROSSVER)
-
-send: all
-	$(PYTHON) $(SEND_PATCH) $(IP) $(CROSSVER)
+all:
+	cmake --preset Release . -DFTP_IP=$(FTP_IP) -DFTP_USERNAME=$(FTP_USERNAME) -DFTP_PASSWORD=$(FTP_PASSWORD) -DLOGGER_IP=$(LOGGER_IP)  &&\
+	cmake --build . --preset Release
 
 clean:
-	$(MAKE) clean -f $(MAKE_NSO)
-	@rm -fr $(PATCH_PREFIX)*
+	rm -r build || true
+
+log: all
+	python3.8 scripts/tcpServer.py 0.0.0.0

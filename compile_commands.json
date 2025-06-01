@@ -1,0 +1,212 @@
+[
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__  -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -g -std=gnu90 -o CMakeFiles/cjson.dir/vendor/cjson/cJSON.c.obj -c /mnt/p/git/RegionalDialect/vendor/cjson/cJSON.c",
+  "file": "/mnt/p/git/RegionalDialect/vendor/cjson/cJSON.c",
+  "output": "CMakeFiles/cjson.dir/vendor/cjson/cJSON.c.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src  -x assembler-with-cpp -g -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -g -o CMakeFiles/subsdk9.dir/src/englishTipsBranchFix.s.obj -c /mnt/p/git/RegionalDialect/src/englishTipsBranchFix.s",
+  "file": "/mnt/p/git/RegionalDialect/src/englishTipsBranchFix.s",
+  "output": "CMakeFiles/subsdk9.dir/src/englishTipsBranchFix.s.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/src/RegionalDialect/Config.cpp.obj -c /mnt/p/git/RegionalDialect/src/RegionalDialect/Config.cpp",
+  "file": "/mnt/p/git/RegionalDialect/src/RegionalDialect/Config.cpp",
+  "output": "CMakeFiles/subsdk9.dir/src/RegionalDialect/Config.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/src/RegionalDialect/Hook.cpp.obj -c /mnt/p/git/RegionalDialect/src/RegionalDialect/Hook.cpp",
+  "file": "/mnt/p/git/RegionalDialect/src/RegionalDialect/Hook.cpp",
+  "output": "CMakeFiles/subsdk9.dir/src/RegionalDialect/Hook.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/src/RegionalDialect/System.cpp.obj -c /mnt/p/git/RegionalDialect/src/RegionalDialect/System.cpp",
+  "file": "/mnt/p/git/RegionalDialect/src/RegionalDialect/System.cpp",
+  "output": "CMakeFiles/subsdk9.dir/src/RegionalDialect/System.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/src/RegionalDialect/Text.cpp.obj -c /mnt/p/git/RegionalDialect/src/RegionalDialect/Text.cpp",
+  "file": "/mnt/p/git/RegionalDialect/src/RegionalDialect/Text.cpp",
+  "output": "CMakeFiles/subsdk9.dir/src/RegionalDialect/Text.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/src/RegionalDialect/Utils.cpp.obj -c /mnt/p/git/RegionalDialect/src/RegionalDialect/Utils.cpp",
+  "file": "/mnt/p/git/RegionalDialect/src/RegionalDialect/Utils.cpp",
+  "output": "CMakeFiles/subsdk9.dir/src/RegionalDialect/Utils.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/src/program/main.cpp.obj -c /mnt/p/git/RegionalDialect/src/program/main.cpp",
+  "file": "/mnt/p/git/RegionalDialect/src/program/main.cpp",
+  "output": "CMakeFiles/subsdk9.dir/src/program/main.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/diag/assert.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/diag/assert.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/diag/assert.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/diag/assert.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/diag/reboot_to_payload.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/diag/reboot_to_payload.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/diag/reboot_to_payload.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/diag/reboot_to_payload.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/hook/nx64/hook_impl.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/hook/nx64/hook_impl.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/hook/nx64/hook_impl.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/hook/nx64/hook_impl.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/hook/nx64/inline_impl.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/hook/nx64/inline_impl.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/hook/nx64/inline_impl.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/hook/nx64/inline_impl.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/init/init.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/init/init.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/init/init.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/init/init.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/log/svc_logger.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/log/svc_logger.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/log/svc_logger.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/log/svc_logger.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/module.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/module.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/module.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/module.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src  -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -g -std=gnu17 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/nx/kernel/virtmem.c.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/nx/kernel/virtmem.c",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/nx/kernel/virtmem.c",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/nx/kernel/virtmem.c.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src  -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -g -std=gnu17 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/nx/smc.c.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/nx/smc.c",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/nx/smc.c",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/nx/smc.c.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/reloc/reloc.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/reloc/reloc.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/reloc/reloc.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/reloc/reloc.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/reloc/table/lookup.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/reloc/table/lookup.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/reloc/table/lookup.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/reloc/table/lookup.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/util/random.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/util/random.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/util/random.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/util/random.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/util/sys/cur_proc_handle.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/util/sys/cur_proc_handle.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/util/sys/cur_proc_handle.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/util/sys/cur_proc_handle.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/util/sys/mem_layout.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/util/sys/mem_layout.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/util/sys/mem_layout.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/util/sys/mem_layout.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/util/sys/rw_pages.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/util/sys/rw_pages.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/util/sys/rw_pages.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/util/sys/rw_pages.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/util/version.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/util/version.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/util/version.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/util/version.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/rtld/ModuleObject.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/rtld/ModuleObject.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld/ModuleObject.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/rtld/ModuleObject.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/rtld/ld.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/rtld/ld.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld/ld.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/rtld/ld.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/rtld/relocation.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/rtld/relocation.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld/relocation.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/rtld/relocation.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/exlaunch/rtld/utils.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/rtld/utils.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld/utils.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/rtld/utils.cpp.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src  -x assembler-with-cpp -g -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -g -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/hook/nx64/inline_asm.s.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/hook/nx64/inline_asm.s",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/hook/nx64/inline_asm.s",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/hook/nx64/inline_asm.s.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src  -x assembler-with-cpp -g -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -g -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/init/crt0.s.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/init/crt0.s",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/init/crt0.s",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/init/crt0.s.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src  -x assembler-with-cpp -g -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -g -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/init/header.s.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/init/header.s",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/init/header.s",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/init/header.s.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src  -x assembler-with-cpp -g -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -g -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/nx/arm/cache.s.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/nx/arm/cache.s",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/nx/arm/cache.s",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/nx/arm/cache.s.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src  -x assembler-with-cpp -g -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -g -o CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/nx/kernel/svc.s.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/lib/nx/kernel/svc.s",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/lib/nx/kernel/svc.s",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/lib/nx/kernel/svc.s.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src  -x assembler-with-cpp -g -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -g -o CMakeFiles/subsdk9.dir/vendor/exlaunch/rtld/dl_trampoline.s.obj -c /mnt/p/git/RegionalDialect/vendor/exlaunch/rtld/dl_trampoline.s",
+  "file": "/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld/dl_trampoline.s",
+  "output": "CMakeFiles/subsdk9.dir/vendor/exlaunch/rtld/dl_trampoline.s.obj"
+},
+{
+  "directory": "/mnt/p/git/RegionalDialect/build/LocalDebug",
+  "command": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-g++ -DEXL_LOAD_KIND=Module -DEXL_LOAD_KIND_ENUM=EXL_LOAD_KIND_MODULE -DEXL_PROGRAM_ID=0x0100c17017cbc000 -DNNSDK=1 -DSWITCH -D__RTLD_6XX__ -D__SWITCH__ -I/mnt/p/git/RegionalDialect/vendor/exlaunch -I/mnt/p/git/RegionalDialect/vendor/exlaunch/lib -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nvn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/nn -I/mnt/p/git/RegionalDialect/vendor/exlaunch/rtld -I/mnt/p/git/RegionalDialect/vendor -I/mnt/p/git/RegionalDialect/src   -g -Wall -O3 -ffunction-sections -fdata-sections -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fpic -fvisibility=hidden -Wno-invalid-offsetof -Wno-volatile -fexceptions -DISEMU= -g -std=gnu++23 -o CMakeFiles/subsdk9.dir/vendor/skyline/utils/cpputils.cpp.obj -c /mnt/p/git/RegionalDialect/vendor/skyline/utils/cpputils.cpp",
+  "file": "/mnt/p/git/RegionalDialect/vendor/skyline/utils/cpputils.cpp",
+  "output": "CMakeFiles/subsdk9.dir/vendor/skyline/utils/cpputils.cpp.obj"
+}
+]

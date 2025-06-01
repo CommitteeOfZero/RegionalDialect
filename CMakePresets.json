@@ -1,0 +1,52 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "Debug",
+      "description": "Default Debug Configuration",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "toolchainFile": "${sourceDir}/cmake/toolchain.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
+      },
+      "installDir": "${sourceDir}/output/${prefixName}"
+    },
+    {
+      "name": "Release",
+      "description": "Default Debug Configuration",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "toolchainFile": "${sourceDir}/cmake/toolchain.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
+      },
+      "installDir": "${sourceDir}/output/${prefixName}"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "Debug",
+      "description": "Default Debug Build",
+      "configurePreset": "Debug",
+      "targets": [
+        "install"
+      ]
+    },
+    {
+      "name": "Release",
+      "description": "Default Release Build",
+      "configurePreset": "Release",
+      "targets": [
+        "install"
+      ]
+    }
+  ]
+}
