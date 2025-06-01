@@ -16,7 +16,7 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
       },
-      "installDir": "${sourceDir}/output/${prefixName}"
+      "installDir": "${sourceDir}/output/${presetName}"
     },
     {
       "name": "Release",
@@ -28,7 +28,7 @@
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
       },
-      "installDir": "${sourceDir}/output/${prefixName}"
+      "installDir": "${sourceDir}/output/${presetName}"
     }
   ],
   "buildPresets": [
