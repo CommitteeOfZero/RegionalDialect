@@ -2,22 +2,16 @@
 #include <list>
 #include <vector>
 
-#include "lib.hpp"
 #include "skyline/utils/cpputils.hpp"
+#include "log/logger_mgr.hpp"
 
-#include "RegionalDialect/System.h"
 #include "RegionalDialect/Utils.h"
+#include "RegionalDialect/System.h"
 
 #include "RegionalDialect/Text.h"
-#include <log/logger_mgr.hpp>
 
 extern "C" {
-    uintptr_t englishTipsHideBranch1;
-    uintptr_t englishTipsShowBranch1;
-    uintptr_t englishTipsHideBranch2;
-    uintptr_t englishTipsShowBranch2;
-    void englishTipsBranchFix1(void);
-    void englishTipsBranchFix2(void);
+    void englishTipsBranchFix(void);
 }
 
 namespace rd {
@@ -58,7 +52,7 @@ void transformFontAtlasCoordinates(
 void semiTokeniseSc3String(int8_t *sc3string, std::list<StringWord_t> &words,
                            int baseGlyphSize, int lineLength) {
     rd::sys::ScriptThreadState sc3;
-    int sc3evalResult;
+    int32_t sc3evalResult;
     StringWord_t word = {sc3string, NULL, 0, false, false};
     int8_t c;
     while (sc3string != nullptr) {
@@ -115,9 +109,9 @@ void processSc3TokenList(int xOffset, int yOffset,int lineLength,
                         int currentColor, int lineHeight) {
 
     rd::sys::ScriptThreadState sc3;
-    int sc3evalResult;
+    int32_t sc3evalResult;
 
-    memset(result, 0, sizeof(ProcessedSc3String_t));
+    ::memset(result, 0, sizeof(ProcessedSc3String_t));
 
     int curLineLength = 0;
     int prevLineLength = 0;
@@ -191,7 +185,7 @@ void processSc3TokenList(int xOffset, int yOffset,int lineLength,
                     break;
                 case 0x1E:
                     sc3string++;
-                    // [[fallthrough]];
+                    [[fallthrough]];
                 case 0x1F:
                     sc3string++;
                     break;
@@ -316,10 +310,6 @@ void TipsDataInit::Callback(ulong thread, unsigned short *addr1, unsigned short 
     // Running hooked function to populate EPmax
     Orig(thread, addr1, addr2);
 
-    // cmp and mov instructions with register and immediate value fields zeroed out
-    const uint32_t cmpiTemplate = 0x7100001F;
-    const uint32_t moviTemplate = 0x52800000;
-
     uintptr_t SystemMenuDispAddr = rd::hook::SigScan("game", "SystemMenuDisp");
 
     // Get address of first comparison to patch
@@ -327,25 +317,14 @@ void TipsDataInit::Callback(ulong thread, unsigned short *addr1, unsigned short 
 
     // Patching the comparison with the actual EPmax instead of hardcoded value
     // EPmax - 5 because of repeated TIPs
-    rd::utils::overwrite_u32(patchInCmp1Addr,      cmpiTemplate | ((*EPmaxPtr - 5) << 10) | (0x9 << 5));
-    rd::utils::overwrite_u32(patchInCmp1Addr + 4,  moviTemplate | ((*EPmaxPtr - 5) << 5)  | 0x8);
-
+    rd::utils::Overwrite(patchInCmp1Addr,       inst::CmpImmediate(reg::W9, *EPmaxPtr - 5).Value());
+    rd::utils::Overwrite(patchInCmp1Addr + 4,   inst::Movz(reg::W8, *EPmaxPtr - 5).Value());
+    
     // Same for the second comparison, although with different order and registers
     const uintptr_t patchInCmp2Addr = patchInCmp1Addr + 0x300;
         
-    rd::utils::overwrite_u32(patchInCmp2Addr,      moviTemplate | ((*EPmaxPtr - 5) << 5)  | 0x9);
-    rd::utils::overwrite_u32(patchInCmp2Addr + 8,  cmpiTemplate | ((*EPmaxPtr - 5) << 10) | (0x8 << 5));
-
-    rd::utils::overwrite_trampoline(
-        englishTipsShowBranch1 - 0x4,
-        (uintptr_t)&englishTipsBranchFix1,
-        0
-    );
-    rd::utils::overwrite_trampoline(
-        englishTipsShowBranch2 - 0x4,
-        (uintptr_t)&englishTipsBranchFix2,
-        0
-    );
+    rd::utils::Overwrite(patchInCmp2Addr,       inst::Movz(reg::W9, *EPmaxPtr - 5).Value());
+    rd::utils::Overwrite(patchInCmp2Addr + 8,   inst::CmpImmediate(reg::W8, *EPmaxPtr - 5).Value());
 }
 
 void MESsetNGflag::Callback(int nameNewline, int rubyEnabled) {
@@ -598,7 +577,6 @@ void MESrevDispText::Callback(int fontSurfaceId, int maskSurfaceId, int param3, 
     Orig(fontSurfaceId, maskSurfaceId, param3, param4, param5, param6, param7);
 }
 
-
 void Init(std::string const& romMount) {
     Result rc = 0;
     rc = skyline::utils::readFile(romMount + "system/widths.bin", 0, &ourTable[0], 8000);
@@ -628,26 +606,37 @@ void Init(std::string const& romMount) {
     MESrevDispPosPtr = (uint32_t*)rd::hook::SigScan("game", "MESrevDispPosPtr");
     MESrevDispMaxPtr = (uint32_t*)rd::hook::SigScan("game", "MESrevDispMaxPtr");
 
-    englishTipsHideBranch1 = rd::hook::SigScan("game", "englishTipsHideBranch1");
-    englishTipsShowBranch1 = rd::hook::SigScan("game", "englishTipsShowBranch1");
-    englishTipsHideBranch2 = rd::hook::SigScan("game", "englishTipsHideBranch2");
-    englishTipsShowBranch2 = rd::hook::SigScan("game", "englishTipsShowBranch2");
+    if (rd::config::config["gamedef"]["signatures"]["game"].has("englishTipsFixBranch1")) {
+        rd::utils::Trampoline(
+            rd::hook::SigScan("game", "englishTipsFixBranch1"),
+            (uintptr_t)&englishTipsBranchFix,
+            reg::X0
+        );
+    }
+
+    if (rd::config::config["gamedef"]["signatures"]["game"].has("englishTipsFixBranch2")) {
+        rd::utils::Trampoline(
+            rd::hook::SigScan("game", "englishTipsFixBranch2"),
+            (uintptr_t)&englishTipsBranchFix,
+            reg::X0
+        );
+    }
 
     uintptr_t englishOnlyOffsetTable = rd::hook::SigScan("game", "englishOnlyOffsetTable");
     if (englishOnlyOffsetTable != 0 && *(uint32_t*)englishOnlyOffsetTable != 0xFFFFFF00)
-        rd::utils::memset(englishOnlyOffsetTable, 0, 640);
+        ::memset(reinterpret_cast<void*>(englishOnlyOffsetTable), 0, 640);
 
     if (rd::config::config["gamedef"]["signatures"]["game"].has("widthCheck")) {
         uint32_t branchFix = 0x3A5F43E8; 
         for (uintptr_t widthCheck : rd::hook::SigScanArray("game", "widthCheck", true))
-            rd::utils::overwrite_u32(widthCheck, branchFix);
+            rd::utils::Overwrite(widthCheck, branchFix);
     }
 
     if (rd::config::config["gamedef"]["signatures"]["game"].has("fontAlinePtr"))
-        rd::utils::overwrite_ptr(rd::hook::SigScan("game", "fontAlinePtr"), &ourTable[0]);
+        rd::utils::Overwrite(rd::hook::SigScan("game", "fontAlinePtr"), &ourTable[0]);
 
     if (rd::config::config["gamedef"]["signatures"]["game"].has("fontAline2Ptr"))
-        rd::utils::overwrite_ptr(rd::hook::SigScan("game", "fontAline2Ptr"), &ourTable[0]);
+        rd::utils::Overwrite(rd::hook::SigScan("game", "fontAline2Ptr"), &ourTable[0]);
 
     HOOK_FUNC(game, GSLfontStretchF);
     HOOK_FUNC(game, GSLfontStretchWithMaskF);

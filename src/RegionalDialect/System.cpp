@@ -138,10 +138,10 @@ void Init() {
 
     if (rd::config::config["gamedef"]["signatures"]["game"].has("audioLoweringAddr")) {
         uintptr_t audioLoweringAddr = rd::hook::SigScan("game", "audioLoweringAddr");
-        uint32_t nop = 0xD503201F;
+        uint32_t nop = inst::Nop().Value();
 
-        rd::utils::overwrite_u32(audioLoweringAddr,     nop);
-        rd::utils::overwrite_u32(audioLoweringAddr + 4, nop);
+        rd::utils::Overwrite(audioLoweringAddr,     nop);
+        rd::utils::Overwrite(audioLoweringAddr + 4, nop);
     }
 
     if (rd::config::config["gamedef"]["signatures"]["game"].has("OPTmenuMaxCur")) {
@@ -150,16 +150,16 @@ void Init() {
     }
     
     if (rd::config::config["gamedef"]["signatures"]["game"].has("SkipModeFix"))
-        rd::utils::overwrite_u32(rd::hook::SigScan("game", "SkipModeFix"), 0x17FFFFB9);
+        rd::utils::Overwrite(rd::hook::SigScan("game", "SkipModeFix"), inst::Branch(-284).Value());
 
     if (rd::config::config["gamedef"]["signatures"]["game"].has("DoZSelection1"))
-        rd::utils::overwrite_u32(rd::hook::SigScan("game", "DoZSelection1"), 0x17FFFF39);
+        rd::utils::Overwrite(rd::hook::SigScan("game", "DoZSelection1"), inst::Branch(-796).Value());
 
     if (rd::config::config["gamedef"]["signatures"]["game"].has("DoZSelection2"))
-        rd::utils::overwrite_u32(rd::hook::SigScan("game", "DoZSelection2"), 0x17FFFFB0);
+        rd::utils::Overwrite(rd::hook::SigScan("game", "DoZSelection2"), inst::Branch(-320).Value());
     
     if (rd::config::config["gamedef"]["signatures"]["game"].has("ShortcutMenuFix"))
-        rd::utils::overwrite_u32(rd::hook::SigScan("game", "ShorcutMenuFix"), 0x52806E00);
+        rd::utils::Overwrite(rd::hook::SigScan("game", "ShorcutMenuFix"), inst::Movz(reg::W0, 0x370).Value());
 
     HOOK_FUNC(game, GSLflatRectF);
     HOOK_FUNC(game, SetFlag);

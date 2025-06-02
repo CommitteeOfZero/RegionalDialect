@@ -1,14 +1,13 @@
 #include <cstdint>
 #include <map>
 #include <string>
+#include <sstream>
 
-#include "lib.hpp"
+#include "log/logger_mgr.hpp"
 #include "skyline/utils/cpputils.hpp"
 
-#include <log/logger_mgr.hpp>
-
-#include "RegionalDialect/Hook.h"
 #include "RegionalDialect/Utils.h"
+#include "RegionalDialect/Hook.h"
 #include "RegionalDialect/Config.h"
 
 enum SigExprTokenType {
@@ -99,8 +98,8 @@ class SigExprParser {
                 lexer.nextToken();
 
                 if (token.type == Comma && allowComma) {
-                    uintptr_t offset = expression(false);
-                    result = rd::utils::retrievePointer(result, offset);
+                    ptrdiff_t offset = expression(false);
+                    result = rd::utils::AssemblePointer(result, offset);
                     token = lexer.getToken();
                     lexer.nextToken();
                 } 
@@ -187,28 +186,25 @@ static bool TransformPattern(string patterntext, vector<PatternByte>& pattern) {
     int len = patterntext.length();
     if (!len) return false;
 
-    if (len % 2)  // not a multiple of 2
-    {
+    if (len % 2) {                              // not a multiple of 2
         patterntext += '?';
         len++;
     }
 
     PatternByte newByte;
     for (int i = 0, j = 0; i < len; i++) {
-        if (patterntext[i] == '?')  // wildcard
-        {
-        newByte.nibble[j].wildcard = true;  // match anything
-        } else                                // hex
-        {
-        newByte.nibble[j].wildcard = false;
-        newByte.nibble[j].data = HexChToInt(patterntext[i]) & 0xF;
+        if (patterntext[i] == '?') {            // wildcard
+            newByte.nibble[j].wildcard = true;  // match anything
+        } else {                                // hex
+            newByte.nibble[j].wildcard = false;
+            newByte.nibble[j].data = HexChToInt(patterntext[i]) & 0xF;
         }
 
         j++;
-        if (j == 2)  // two nibbles = one byte
-        {
-        j = 0;
-        pattern.push_back(newByte);
+
+        if (j == 2) {  // two nibbles = one byte
+            j = 0;
+            pattern.push_back(newByte);
         }
     }
     return true;
@@ -246,10 +242,11 @@ uintptr_t FindPattern(const unsigned char* dataStart,
     while (true) {
         // Search for the pattern..
         const unsigned char* ret = search(scanStart, dataEnd, patterndata.begin(),
-                                        patterndata.end(), MatchByte);
+                                          patterndata.end(), MatchByte);
 
         // Did we find a match..
-        if (ret != dataEnd) {
+        if (ret == dataEnd) break;
+
         // If we hit the usage count, return the result..
         if (occurrence == 0 || resultCount == occurrence)
             return baseAddress + distance(dataStart, ret) + offset;
@@ -257,31 +254,29 @@ uintptr_t FindPattern(const unsigned char* dataStart,
         // Increment the found count and scan again..
         resultCount++;
         scanStart = ++ret;
-        } else
-        break;
     }
 
     return 0;
 }
 
 uintptr_t SigScanRaw(const char *pattern, size_t offset, int occurrence) {
-    Logging.Log(pattern);
+    std::stringstream logstr;
+
+    logstr << pattern;
 
     uintptr_t baseAddress = exl::util::GetMainModuleInfo().m_Text.m_Start;
     uintptr_t endAddress =  exl::util::GetMainModuleInfo().m_Rodata.m_Start;
     
     uintptr_t retval = FindPattern((unsigned char*)baseAddress,
-                                    (unsigned char*)endAddress,
-                                    pattern, baseAddress, offset,
-                                    occurrence);
+                                   (unsigned char*)endAddress,
+                                   pattern, baseAddress, offset,
+                                   occurrence);
 
-    if (retval != 0) {
-        Logging.Log(" found at 0x%08X!\n", retval);
-        return retval;
-    }
+    if (retval != 0) logstr << " found at 0x" << std::hex << std::uppercase << retval << "!\n";
+    else logstr << " not found!\n";
 
-    Logging.Log(" not found!\n");
-    return 0;
+    Logging.Log(logstr.str());
+    return retval;
 }
 
 uintptr_t SigScan(const char* category, const char* sigName) {
@@ -289,6 +284,7 @@ uintptr_t SigScan(const char* category, const char* sigName) {
         Logging.Log("Signature for %s is missing!\n", sigName);
         return 0;
     }
+
     Logging.Log("SigScan: looking for %s/%s...\n", category, sigName);
 
     rd::config::JsonWrapper sig = rd::config::config["gamedef"]["signatures"][category][sigName];

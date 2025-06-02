@@ -1,28 +1,28 @@
 #pragma once
 
 #include <cstdint>
-#include <stddef.h>
+#include <cstring>
+
+#include "lib/armv8.hpp"
+#include "util/sys/rw_pages.hpp"
+
+namespace inst = exl::armv8::inst;
+namespace reg = exl::armv8::reg;
 
 namespace rd {
 namespace utils {
 
-uint32_t get_u32(uintptr_t address);
+template <typename T>
+inline void Overwrite(uintptr_t address, const T &value) {
+    static_assert(std::is_trivially_copyable_v<T>, "Type must be trivially copyable!");
+    exl::util::RwPages control(address, sizeof(T));
+    ::memcpy(reinterpret_cast<void*>(control.GetRw()), &value, sizeof(T));
+    control.Flush();
+}
 
-uintptr_t get_ptr(uintptr_t address);
+void Trampoline(uintptr_t address, uintptr_t target, reg::Register reg);
 
-void overwrite_u32(uintptr_t address, uint32_t value);
-
-void memset(uintptr_t address, int8_t value, size_t size);
-
-void overwrite_ptr(uintptr_t address, void *value);
-
-void overwrite_b(uintptr_t address, intptr_t offset);
-
-void overwrite_b_abs(uintptr_t address, uintptr_t target);
-
-void overwrite_trampoline(uintptr_t address, uintptr_t target, uint8_t reg);
-
-uintptr_t retrievePointer(uint64_t adrp_addr, uint64_t ldr_offset = 0x4);
+uintptr_t AssemblePointer(uintptr_t adrp_addr, ptrdiff_t ldr_offset);
 
 }  // namespace utils
 }  // namespace rd

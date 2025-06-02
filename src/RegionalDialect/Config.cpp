@@ -1,7 +1,7 @@
 
 #include <vector>
-#include "common.hpp"
-#include <log/logger_mgr.hpp>
+
+#include "log/logger_mgr.hpp"
 #include "skyline/utils/cpputils.hpp"
 
 #include "RegionalDialect/Config.h"
@@ -74,13 +74,13 @@ void Init(std::string const& romMount) {
     ::cJSON_InitHooks(nullptr);
     cJSON *inner = ::cJSON_CreateObject();
     cJSON *parseResult = cJSON_ParseWithLength(contents, contentsSize);
-    if( parseResult == NULL) {
+    if (parseResult == NULL) {
         Logging.Log("Failed to parse gamedef.json: %s\n", ::cJSON_GetErrorPtr());
         free((void*)contents);
         return;
     }
     bool result = ::cJSON_AddItemToObject(inner, "gamedef", parseResult);
-    if( !result || inner == NULL) {
+    if (!result || inner == NULL) {
         Logging.Log("Failed to parse gamedef.json: %s\n", ::cJSON_GetErrorPtr());
     } else {
         Logging.Log("Successfully parsed gamedef.json\n");

@@ -11,26 +11,15 @@
 	.cfi_endproc
 .endm
 
-CODE_BEGIN englishTipsBranchFix1 
+CODE_BEGIN englishTipsBranchFix
+    ldr w18, [x12]
     cmp w18, #0x8d
-    b.lt show1
+    b.lt show
     cmp w18, #0x91
-    b.hi show1
-    ldr x0, englishTipsHideBranch1
-    br x0
-show1:
-    ldr x0, englishTipsShowBranch1
-    br x0
-CODE_END
-
-CODE_BEGIN englishTipsBranchFix2 
-    cmp w17, #0x8d
-    b.lt show2
-    cmp w17, #0x91
-    b.hi show2
-    ldr x0, englishTipsHideBranch2
-    br x0
-show2:
-    ldr x0, englishTipsShowBranch2
-    br x0
+    b.hi show
+    ccmn wzr, wzr, 0b0010, mi   // Trigger the b.hi to hide the TIPs
+    ret                         // (Z == 0) && (C == 1)
+show:
+    ccmn wzr, wzr, 0b0000, mi   // Don't trigger and show TIPs
+    ret
 CODE_END

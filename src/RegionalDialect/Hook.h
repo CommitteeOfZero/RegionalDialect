@@ -4,13 +4,12 @@
 #include "lib.hpp"
 #include "lib/hook/trampoline.hpp"
 
-#define DECLARE_HOOK(name, ret, ...)                                    \
-    using name##Func = ret (*)(__VA_ARGS__);                            \
+#define DECLARE_HOOK(name, ret, ...)                                            \
     HOOK_DEFINE_TRAMPOLINE(name) { static ret Callback(__VA_ARGS__); };
 
-#define HOOK_FUNC(category, name)                                            \
-    if (rd::config::config["gamedef"]["signatures"][#category].has(#name)) { \
-        name::InstallAtPtr(rd::hook::SigScan(#category, #name));             \
+#define HOOK_FUNC(category, name)                                               \
+    if (rd::config::config["gamedef"]["signatures"][#category].has(#name)) {    \
+        name::InstallAtPtr(rd::hook::SigScan(#category, #name));                \
     }
 
 namespace rd {

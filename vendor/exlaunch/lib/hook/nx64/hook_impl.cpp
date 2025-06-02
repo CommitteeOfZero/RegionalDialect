@@ -224,7 +224,8 @@ namespace exl::hook::nx64 {
             }      // if
 
             intptr_t current_idx = ctxp->get_and_set_current_index(*inprxp, *outprx);
-            int64_t absolute_addr = reinterpret_cast<int64_t>(*inprxp) + ((ins & ~lmask) >> (lsb - 2u));
+            struct { int64_t bits : 21; } imm19_00 = { (ins & ~lmask) >> (lsb - 2u) };
+            int64_t absolute_addr = reinterpret_cast<int64_t>(*inprxp) + imm19_00.bits;
             int64_t new_pc_offset = static_cast<int64_t>(absolute_addr - reinterpret_cast<int64_t>(*outprx)) >> 2;  // shifted
             bool special_fix_type = ctxp->is_in_fixing_range(absolute_addr);
             if (!special_fix_type && llabs(new_pc_offset) >= (~lmask >> (lsb + 1))) {
