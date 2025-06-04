@@ -18,18 +18,19 @@ jobs:
           submodules: true
           fetch-depth: '0'
 
-      - name: Build the project
-        run: make
+      - uses: lukka/get-cmake@latest
 
-      - name: Rename output
-        run: |
-          mv RegionalDialect600.nso subsdk9
+      - name: Build the project
+        uses: lukka/run-cmake@v10
+        with:
+          configurePreset: Release
+          buildPreset: Release
 
       - name: Create Github Artifact
         uses: actions/upload-artifact@v4.1.0
         with:
           name: subsdk9
-          path: subsdk9
+          path: ${{ github.workspace }}/output/Release/atmosphere/contents/0100c17017cbc000/exefs/subsdk9
 
       - name: Get Next Version
         id: getver

@@ -18,8 +18,12 @@
 build*/
 debug/
 release/
-lib/
 linkerscripts/symstemp.ld
-skyline_patch*/
 scripts/.idea/*
 !exported.txt
+!CMakeLists.txt
+*.npdm
+*subsdk9
+output/
+CMakeUserPresets.json
+compile_commands.json
