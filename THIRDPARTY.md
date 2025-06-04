@@ -2,18 +2,52 @@
 
 **RegionalDialect contains third-party code at the following locations in the source distribution:**
 
-- `vendor/cJSON`: [cJSON](https://github.com/DaveGamble/cJSON)
+- `vendor/cJSON`: [cJSON](https://github.com/DaveGamble/cJSON) for loading game-specific info at runtime through bundled `.json` files
 - `vendor/exlaunch`: [exlaunch](https://github.com/shadowninja108/exlaunch) as the current code injection framework
-- `vendor/skyline`: [skyline](https://github.com/skyline-dev/skyline), formerly as the code injection framework, currently for filesystem utilities
+- `vendor/skyline`: [skyline](https://github.com/skyline-dev/skyline), formerly used as the code injection framework and currently used for filesystem utilities
+
+Additionally, craftyboss's project template and build scripts from [Scarlet-Exlaunch-Base](https://github.com/craftyboss/scarlet-exlaunch-base) are used to build RegionalDialect.
+
+All third-party code mentioned above is mandatory, included in the build process and compiled into the output module for RegionalDialect on every build configuration.
 
 # Statements
 
 ## cJSON
 
-### MIT
+https://github.com/DaveGamble/cJSON
+
+Copyright (c) 2009-2017 Dave Gamble and cJSON contributors
+
+See below for license text (MIT).
+
+## exlaunch
+
+https://github.com/shadowninja108/exlaunch
+
+See below for license text (GPL-2.0).
+
+## scarlet-exlaunch-base
+
+https://github.com/craftyboss/scarlet-exlaunch-base
+
+See below for license text (GPL-2.0).
+
+## skyline
+
+https://github.com/skyline-dev/skyline
+
+Copyright (c) 2020 The Skyline Project
+
+See below for license text (MIT).
+
+# Generic license texts
+
+## MIT
 
 ```
-Copyright (c) 2009-2017 Dave Gamble and cJSON contributors
+MIT License
+
+Copyright (c) [year] [fullname]
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -34,8 +68,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-## exlaunch
-### GPL-2.0
+## GPL-2.0
 
 ```
                     GNU GENERAL PUBLIC LICENSE
@@ -377,30 +410,4 @@ proprietary programs.  If your program is a subroutine library, you may
 consider it more useful to permit linking proprietary applications with the
 library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.
-```
-
-## skyline
-
-### MIT
-
-```
-Copyright (c) 2020 The Skyline Project
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
 ```

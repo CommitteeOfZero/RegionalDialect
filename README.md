@@ -27,10 +27,14 @@ Once built, copy the subsd9 file into the exefs directory corresponding to the g
 
 ## Credits
 
-- shadowninja108 - [Exlaunch](https://github.com/shadowninja108/exlaunch), the hook framework for injecting C/C++ code 
-- craftyboss - [scarlet-exlaunch-base](https://github.com/craftyboss/scarlet-exlaunch-base), exlaunch game mod project template and CMake build scripts
-- skyline-dev - [skyline](https://github.com/skyline-dev/skyline), the previous implementation for the hooking framework and helpful Switch utility functions
+- DaveGamble - [cJSON](https://github.com/DaveGamble/cJSON)
 
-**Check [THIRDPARTY.md](THIRDPARTY.md) for further licensing info.**
+- shadowninja108 - [Exlaunch](https://github.com/shadowninja108/exlaunch)
+
+- craftyboss - [scarlet-exlaunch-base](https://github.com/craftyboss/scarlet-exlaunch-base)
+
+- skyline-dev - [skyline](https://github.com/skyline-dev/skyline)
+
+**Check [THIRDPARTY.md](THIRDPARTY.md) for further info.**
 
 
