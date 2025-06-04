@@ -31,4 +31,6 @@ Once built, copy the subsd9 file into the exefs directory corresponding to the g
 - craftyboss - [scarlet-exlaunch-base](https://github.com/craftyboss/scarlet-exlaunch-base), exlaunch game mod project template and CMake build scripts
 - skyline-dev - [skyline](https://github.com/skyline-dev/skyline), the previous implementation for the hooking framework and helpful Switch utility functions
 
+**Check [THIRDPARTY.md](THIRDPARTY.md) for further licensing info.**
+
 
