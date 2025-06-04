@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.25)
 project(subsdk CXX C ASM)
 
 ## Error if not using switch toolchain file
@@ -6,11 +6,12 @@ if (NOT SWITCH)
   message(FATAL_ERROR "Not targeting switch, make sure to specify -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain.cmake")
 endif ()
 
-if (LOGGER_IP)
-  add_compile_definitions(LOGGER_IP="${LOGGER_IP}")
-endif ()
-
 ## Title Id
+if(DEFINED ENV{TITLE_ID})
+  set(TITLE_ID $ENV{TITLE_ID})
+else()
+  set(TITLE_ID 0100c17017cbc000) # Title ID for CHN, if not set in environment
+endif()
 set(TITLE_ID 0100c17017cbc000)
 set(CONFIG_TITLE_ID 0x${TITLE_ID})
 add_compile_definitions(EXL_PROGRAM_ID=${CONFIG_TITLE_ID} NNSDK=1)
@@ -96,24 +97,7 @@ set_target_properties(subsdk9 PROPERTIES LINK_FLAGS "-specs ${CMAKE_BINARY_DIR}/
 
 add_custom_target(subsdk9_meta DEPENDS create_npdm subsdk9_nso)
 
-install(FILES ${CMAKE_BINARY_DIR}/subsdk9 DESTINATION atmosphere/contents/${TITLE_ID}/exefs)
-install(FILES ${CMAKE_BINARY_DIR}/main.npdm DESTINATION atmosphere/contents/${TITLE_ID}/exefs)
-install(FILES ${PROJECT_SOURCE_DIR}/src/gamedef.json DESTINATION atmosphere/contents/${TITLE_ID}/romfs/system)
-install(FILES ${PROJECT_SOURCE_DIR}/src/gamedef-jp.json DESTINATION atmosphere/contents/${TITLE_ID}/romfs/system)
-
-if (FTP_IP)
-  ## Upload to target switch
-  if(FTP_USERNAME AND FTP_PASSWORD) # login using a username and password
-    install(CODE "
-      execute_process(
-        COMMAND ncftpput -u ${FTP_USERNAME} -p ${FTP_PASSWORD} -P 5000 ${FTP_IP} /atmosphere/contents/${TITLE_ID}/exefs ${CMAKE_BINARY_DIR}/main.npdm ${CMAKE_BINARY_DIR}/subsdk9
-      )
-    ")
-  else()
-    install(CODE "
-        execute_process(
-          COMMAND ncftpput -u crafty -p boss -P 5000 ${FTP_IP} /atmosphere/contents/${TITLE_ID}/exefs ${CMAKE_BINARY_DIR}/main.npdm ${CMAKE_BINARY_DIR}/subsdk9
-        )
-      ")
-  endif()
-endif ()
+install(FILES ${CMAKE_BINARY_DIR}/subsdk9 DESTINATION .)
+install(FILES ${CMAKE_BINARY_DIR}/main.npdm DESTINATION .)
+install(FILES ${PROJECT_SOURCE_DIR}/src/gamedef.json DESTINATION .)
+install(FILES ${PROJECT_SOURCE_DIR}/src/gamedef-jp.json DESTINATION .)
