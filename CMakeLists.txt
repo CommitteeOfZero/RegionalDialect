@@ -7,12 +7,11 @@ if (NOT SWITCH)
 endif ()
 
 ## Title Id
-if(DEFINED ENV{TITLE_ID})
+if (DEFINED ENV{TITLE_ID})
   set(TITLE_ID $ENV{TITLE_ID})
 else()
-  set(TITLE_ID 0100c17017cbc000) # Title ID for CHN, if not set in environment
+  set(TITLE_ID 0100000000010000) # Default min titleID (doesn't matter for execution, only for NPDM)
 endif()
-set(TITLE_ID 0100c17017cbc000)
 set(CONFIG_TITLE_ID 0x${TITLE_ID})
 add_compile_definitions(EXL_PROGRAM_ID=${CONFIG_TITLE_ID} NNSDK=1)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/module/subsdk9.json.template ${CMAKE_CURRENT_BINARY_DIR}/subsdk9.json)
@@ -37,12 +36,12 @@ file(GLOB_RECURSE SOURCES_H ${PROJECT_SOURCE_DIR}/src/*.h ${PROJECT_SOURCE_DIR}/
 file(GLOB_RECURSE SOURCES_CXX ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/src/*.c)
 file(GLOB_RECURSE LOCAL_LIBRARIES ${PROJECT_SOURCE_DIR}/libs/*.a)
 
-add_library(cjson STATIC
+add_library(cJSON STATIC
   ${PROJECT_SOURCE_DIR}/vendor/cJSON/cJSON.c
   ${PROJECT_SOURCE_DIR}/vendor/cJSON/cJSON.h
 )
 
-set_target_properties(cjson PROPERTIES
+set_target_properties(cJSON PROPERTIES
   C_STANDARD 90
 )
 
@@ -57,7 +56,7 @@ add_executable(subsdk9
   ${SKYLINE_SOURCES}
 )
 
-target_link_libraries(subsdk9 cjson)
+target_link_libraries(subsdk9 cJSON)
 
 set_target_properties(subsdk9 PROPERTIES 
 C_STANDARD 17
@@ -92,12 +91,21 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/module/subsdk9.specs.template ${CMAKE
 ## Build nso & generate npdm
 add_nso_target_subsdk(subsdk9)
 set_target_properties(subsdk9 PROPERTIES CONFIG_JSON "${CMAKE_CURRENT_BINARY_DIR}/subsdk9.json")
-__generate_npdm(subsdk9)
+if (DEFINED ENV{TITLE_ID})
+  __generate_npdm(subsdk9)
+endif ()
 set_target_properties(subsdk9 PROPERTIES LINK_FLAGS "-specs ${CMAKE_BINARY_DIR}/subsdk9.specs -g3 ${ARCH} -nostartfiles")
 
-add_custom_target(subsdk9_meta DEPENDS create_npdm subsdk9_nso)
+if (DEFINED ENV{TITLE_ID})
+  add_custom_target(subsdk9_meta DEPENDS create_npdm subsdk9_nso)
+else ()
+  add_custom_target(subsdk9_meta DEPENDS subsdk9_nso)
+endif ()
+
 
 install(FILES ${CMAKE_BINARY_DIR}/subsdk9 DESTINATION .)
-install(FILES ${CMAKE_BINARY_DIR}/main.npdm DESTINATION .)
+if (DEFINED ENV{TITLE_ID})
+  install(FILES ${CMAKE_BINARY_DIR}/main.npdm DESTINATION .)
+endif ()
 install(FILES ${PROJECT_SOURCE_DIR}/src/gamedef.json DESTINATION .)
 install(FILES ${PROJECT_SOURCE_DIR}/src/gamedef-jp.json DESTINATION .)
