@@ -1,7 +1,5 @@
-#include "RegionalDialect/Utils.h"
-
-#define SYSTEM_IMPLEMENTATION
-#include "RegionalDialect/System.h"
+#include "System.h"
+#include "Mem.h"
 
 namespace rd {
 namespace sys {
@@ -118,7 +116,9 @@ void OptionMain::Callback(void) {
     }
 }
 
-
+bool ChkViewDic::Callback(uint param_1, uint param_2) {
+    return Orig(param_1, param_2);
+}
 
 void Init() {
     ScrWork = (int32_t*)rd::hook::SigScan("game", "ScrWork");
@@ -140,35 +140,42 @@ void Init() {
         uintptr_t audioLoweringAddr = rd::hook::SigScan("game", "audioLoweringAddr");
         uint32_t nop = inst::Nop().Value();
 
-        rd::utils::Overwrite(audioLoweringAddr,     nop);
-        rd::utils::Overwrite(audioLoweringAddr + 4, nop);
+        rd::mem::Overwrite(audioLoweringAddr,     nop);
+        rd::mem::Overwrite(audioLoweringAddr + 4, nop);
     }
 
-    if (rd::config::config["gamedef"]["signatures"]["game"].has("OPTmenuMaxCur")) {
-        uint8_t *OPTmenuMaxCur = (uint8_t*)rd::hook::SigScan("game", "OPTmenuMaxCur");
-        OPTmenuMaxCur[4] = 4;
-    }
     
     if (rd::config::config["gamedef"]["signatures"]["game"].has("SkipModeFix"))
-        rd::utils::Overwrite(rd::hook::SigScan("game", "SkipModeFix"), inst::Branch(-284).Value());
+        rd::mem::Overwrite(rd::hook::SigScan("game", "SkipModeFix"), inst::Branch(-284).Value());
 
     if (rd::config::config["gamedef"]["signatures"]["game"].has("DoZSelection1"))
-        rd::utils::Overwrite(rd::hook::SigScan("game", "DoZSelection1"), inst::Branch(-796).Value());
+        rd::mem::Overwrite(rd::hook::SigScan("game", "DoZSelection1"), inst::Branch(-796).Value());
 
     if (rd::config::config["gamedef"]["signatures"]["game"].has("DoZSelection2"))
-        rd::utils::Overwrite(rd::hook::SigScan("game", "DoZSelection2"), inst::Branch(-320).Value());
+        rd::mem::Overwrite(rd::hook::SigScan("game", "DoZSelection2"), inst::Branch(-320).Value());
     
     if (rd::config::config["gamedef"]["signatures"]["game"].has("ShortcutMenuFix"))
-        rd::utils::Overwrite(rd::hook::SigScan("game", "ShorcutMenuFix"), inst::Movz(reg::W0, 0x370).Value());
+        rd::mem::Overwrite(rd::hook::SigScan("game", "ShorcutMenuFix"), inst::Movz(reg::W0, 0x370).Value());
 
     HOOK_FUNC(game, GSLflatRectF);
     HOOK_FUNC(game, SetFlag);
     HOOK_FUNC(game, GetFlag);
-    HOOK_FUNC(game, SpeakerDrawingFunction);
-    HOOK_FUNC(game, OptionDispChip2);
+
+    if (rd::config::config["patchdef"]["base"]["addNametags"].get<bool>()) {
+     
+        if (rd::config::config["gamedef"]["signatures"]["game"].has("OPTmenuMaxCur")) {
+            uint8_t *OPTmenuMaxCur = (uint8_t*)rd::hook::SigScan("game", "OPTmenuMaxCur");
+            OPTmenuMaxCur[4] = 4;
+        }
+
+        HOOK_FUNC(game, SpeakerDrawingFunction);
+        HOOK_FUNC(game, OptionDispChip2);
+        HOOK_FUNC(game, OptionMain);
+    }
+
     HOOK_FUNC(game, SSEvolume);
-    HOOK_FUNC(game, OptionMain);
     HOOK_FUNC(game, SSEplay);
+    HOOK_FUNC(game, ChkViewDic);
 }
 
 }  // namespace sys

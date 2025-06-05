@@ -1,10 +1,11 @@
 
 #include <vector>
+#include <concepts>
 
-#include "log/logger_mgr.hpp"
-#include "skyline/utils/cpputils.hpp"
+#include <log/logger_mgr.hpp>
+#include <skyline/utils/cpputils.hpp>
 
-#include "RegionalDialect/Config.h"
+#include "Config.h"
 
 namespace rd {
 namespace config {
@@ -40,6 +41,10 @@ template<> size_t JsonWrapper::get<size_t>() {
 
 template<> char* JsonWrapper::get<char*>() {
     return ::cJSON_GetStringValue(inner);
+}
+
+template<> bool JsonWrapper::get<bool>() {
+    return static_cast<bool>(::cJSON_IsTrue(inner));
 }
 
 template<> std::vector<char*> JsonWrapper::get<std::vector<char*>>() {
@@ -79,22 +84,50 @@ void Init(std::string const& romMount) {
         free((void*)contents);
         return;
     }
+
     bool result = ::cJSON_AddItemToObject(inner, "gamedef", parseResult);
     if (!result || inner == NULL) {
         Logging.Log("Failed to parse gamedef.json: %s\n", ::cJSON_GetErrorPtr());
+        goto cleanup;
     } else {
         Logging.Log("Successfully parsed gamedef.json\n");
-        config = JsonWrapper(inner, true);
-        config.print();     
-    }    
+    }
+
     free((void*)contents);
-    Logging.Log("Freed contents\n");
+
+    rc = skyline::utils::readEntireFile(romMount + "system/patchdef.json", (void**)(&contents), &contentsSize);
+    
+    if (R_FAILED(rc)) {
+        Logging.Log("Failed to load patchdef.json: 0x%x\n", rc);
+        goto exit;
+    }
+
+    Logging.Log("Successfully loaded patchdef.json: size(%d)\n", contentsSize);
+
+    parseResult = cJSON_ParseWithLength(contents, contentsSize);
+    if (parseResult == NULL) {
+        Logging.Log("Failed to parse patchdef.json: %s\n", ::cJSON_GetErrorPtr());
+        goto exit;
+    }
+
+    result = ::cJSON_AddItemToObject(inner, "patchdef", parseResult);
+    if (!result || inner == NULL) {
+        Logging.Log("Failed to parse patchdef.json: %s\n", ::cJSON_GetErrorPtr());
+    } else {
+        Logging.Log("Successfully parsed patchdef.json\n");
+    }
+
+exit:
+    config = JsonWrapper(inner, true);
+cleanup:
+    free((void*)contents);
 }
 
 template int JsonWrapper::get<int>();
 template size_t JsonWrapper::get<size_t>();
 template char *JsonWrapper::get<char*>();
 template std::vector<char*> JsonWrapper::get<std::vector<char*>>();
+template bool JsonWrapper::get<bool>();
 
 }  // namespace config
 }  // namespace rd

@@ -2,13 +2,13 @@
 #include <list>
 #include <vector>
 
-#include "skyline/utils/cpputils.hpp"
-#include "log/logger_mgr.hpp"
+#include <skyline/utils/cpputils.hpp>
+#include <log/logger_mgr.hpp>
 
-#include "RegionalDialect/Utils.h"
-#include "RegionalDialect/System.h"
-
-#include "RegionalDialect/Text.h"
+#include "Mem.h"
+#include "System.h"
+#include "Vm.h"
+#include "Text.h"
 
 extern "C" {
     void englishTipsBranchFix(void);
@@ -51,7 +51,7 @@ void transformFontAtlasCoordinates(
 
 void semiTokeniseSc3String(int8_t *sc3string, std::list<StringWord_t> &words,
                            int baseGlyphSize, int lineLength) {
-    rd::sys::ScriptThreadState sc3;
+    rd::vm::ScriptThreadState sc3;
     int32_t sc3evalResult;
     StringWord_t word = {sc3string, NULL, 0, false, false};
     int8_t c;
@@ -70,7 +70,7 @@ void semiTokeniseSc3String(int8_t *sc3string, std::list<StringWord_t> &words,
                 break;
             case 4:
                 sc3.pc = sc3string + 1;
-                CalMain::Callback((long)(void *)&sc3, &sc3evalResult);
+                rd::vm::CalMain::Callback(&sc3, &sc3evalResult);
                 sc3string = (int8_t *)sc3.pc;
                 break;
             case 9:
@@ -108,7 +108,7 @@ void processSc3TokenList(int xOffset, int yOffset,int lineLength,
                         int lastLinkNumber, int curLinkNumber,
                         int currentColor, int lineHeight) {
 
-    rd::sys::ScriptThreadState sc3;
+    rd::vm::ScriptThreadState sc3;
     int32_t sc3evalResult;
 
     ::memset(result, 0, sizeof(ProcessedSc3String_t));
@@ -153,7 +153,7 @@ void processSc3TokenList(int xOffset, int yOffset,int lineLength,
                     break;
                 case 4:
                     sc3.pc = sc3string + 1;
-                    CalMain::Callback((long)(void *)&sc3, &sc3evalResult);
+                    rd::vm::CalMain::Callback(&sc3, &sc3evalResult);
                     sc3string = (int8_t *)sc3.pc;
                     int scrWorkColor;
 
@@ -247,7 +247,8 @@ int GSLfontStretchF::Callback(
     uint color, int opacity, bool shrink
 ) {
 
-    if (fontSurfaceId == 91 && (pos_y0 == 760.5f || pos_y0 == 757.5f)) {
+    if (rd::config::config["patchdef"]["base"]["addNametags"].get<bool>() &&
+        fontSurfaceId == 91 && (pos_y0 == 760.5f || pos_y0 == 757.5f)) {
         if (!rd::sys::GetFlag::Callback(801)) return 0;
         float offset = (MesNameDispLen[0] * 1.5f) / 2.0f;
         pos_x0 += offset; pos_x1 += offset;
@@ -317,14 +318,14 @@ void TipsDataInit::Callback(ulong thread, unsigned short *addr1, unsigned short 
 
     // Patching the comparison with the actual EPmax instead of hardcoded value
     // EPmax - 5 because of repeated TIPs
-    rd::utils::Overwrite(patchInCmp1Addr,       inst::CmpImmediate(reg::W9, *EPmaxPtr - 5).Value());
-    rd::utils::Overwrite(patchInCmp1Addr + 4,   inst::Movz(reg::W8, *EPmaxPtr - 5).Value());
+    rd::mem::Overwrite(patchInCmp1Addr,       inst::CmpImmediate(reg::W9, *EPmaxPtr - 5).Value());
+    rd::mem::Overwrite(patchInCmp1Addr + 4,   inst::Movz(reg::W8, *EPmaxPtr - 5).Value());
     
     // Same for the second comparison, although with different order and registers
     const uintptr_t patchInCmp2Addr = patchInCmp1Addr + 0x300;
         
-    rd::utils::Overwrite(patchInCmp2Addr,       inst::Movz(reg::W9, *EPmaxPtr - 5).Value());
-    rd::utils::Overwrite(patchInCmp2Addr + 8,   inst::CmpImmediate(reg::W8, *EPmaxPtr - 5).Value());
+    rd::mem::Overwrite(patchInCmp2Addr,       inst::Movz(reg::W9, *EPmaxPtr - 5).Value());
+    rd::mem::Overwrite(patchInCmp2Addr + 8,   inst::CmpImmediate(reg::W8, *EPmaxPtr - 5).Value());
 }
 
 void MESsetNGflag::Callback(int nameNewline, int rubyEnabled) {
@@ -453,10 +454,6 @@ int ChatLayout::Callback(uint a1, int8_t *a2, uint a3) {
     
     if (str.lines == 0) return 1;
     return str.lines;
-}
-
-void CalMain::Callback(long param_1, int32_t *param2) {
-    Orig(param_1, param2);
 }
 
 void ChatRendering::Callback(int64_t a1, float a2, float a3, float a4,
@@ -606,49 +603,56 @@ void Init(std::string const& romMount) {
     MESrevDispPosPtr = (uint32_t*)rd::hook::SigScan("game", "MESrevDispPosPtr");
     MESrevDispMaxPtr = (uint32_t*)rd::hook::SigScan("game", "MESrevDispMaxPtr");
 
-    if (rd::config::config["gamedef"]["signatures"]["game"].has("englishTipsFixBranch1")) {
-        rd::utils::Trampoline(
+    if (rd::config::config["patchdef"]["base"]["hookText"].get<bool>()) {
+        uintptr_t englishOnlyOffsetTable = rd::hook::SigScan("game", "englishOnlyOffsetTable");
+        if (englishOnlyOffsetTable != 0 && *(uint32_t*)englishOnlyOffsetTable != 0xFFFFFF00)
+            ::memset(reinterpret_cast<void*>(englishOnlyOffsetTable), 0, 640);
+
+        if (rd::config::config["gamedef"]["signatures"]["game"].has("widthCheck")) {
+            uint32_t branchFix = 0x3A5F43E8; 
+            for (uintptr_t widthCheck : rd::hook::SigScanArray("game", "widthCheck", true))
+                rd::mem::Overwrite(widthCheck, branchFix);
+        }
+
+        if (rd::config::config["gamedef"]["signatures"]["game"].has("fontAlinePtr"))
+            rd::mem::Overwrite(rd::hook::SigScan("game", "fontAlinePtr"), &ourTable[0]);
+
+        if (rd::config::config["gamedef"]["signatures"]["game"].has("fontAline2Ptr"))
+            rd::mem::Overwrite(rd::hook::SigScan("game", "fontAline2Ptr"), &ourTable[0]);
+
+        HOOK_FUNC(game, GSLfontStretchF);
+        HOOK_FUNC(game, GSLfontStretchWithMaskF);
+        HOOK_FUNC(game, GSLfontStretchWithMaskExF);
+        HOOK_FUNC(game, MESsetNGflag);
+    }
+
+    if (rd::config::config["patchdef"]["base"]["tipReimplementation"].get<bool>()) {
+        rd::mem::Trampoline(
             rd::hook::SigScan("game", "englishTipsFixBranch1"),
             (uintptr_t)&englishTipsBranchFix,
             reg::X0
         );
-    }
 
-    if (rd::config::config["gamedef"]["signatures"]["game"].has("englishTipsFixBranch2")) {
-        rd::utils::Trampoline(
+        rd::mem::Trampoline(
             rd::hook::SigScan("game", "englishTipsFixBranch2"),
             (uintptr_t)&englishTipsBranchFix,
             reg::X0
         );
+
+        HOOK_FUNC(game, TipsDataInit);
     }
 
-    uintptr_t englishOnlyOffsetTable = rd::hook::SigScan("game", "englishOnlyOffsetTable");
-    if (englishOnlyOffsetTable != 0 && *(uint32_t*)englishOnlyOffsetTable != 0xFFFFFF00)
-        ::memset(reinterpret_cast<void*>(englishOnlyOffsetTable), 0, 640);
-
-    if (rd::config::config["gamedef"]["signatures"]["game"].has("widthCheck")) {
-        uint32_t branchFix = 0x3A5F43E8; 
-        for (uintptr_t widthCheck : rd::hook::SigScanArray("game", "widthCheck", true))
-            rd::utils::Overwrite(widthCheck, branchFix);
+    if (rd::config::config["patchdef"]["base"]["chnRedoChat"].get<bool>()) {
+        HOOK_FUNC(game, ChatLayout);
+        HOOK_FUNC(game, ChatRendering);
     }
 
-    if (rd::config::config["gamedef"]["signatures"]["game"].has("fontAlinePtr"))
-        rd::utils::Overwrite(rd::hook::SigScan("game", "fontAlinePtr"), &ourTable[0]);
-
-    if (rd::config::config["gamedef"]["signatures"]["game"].has("fontAline2Ptr"))
-        rd::utils::Overwrite(rd::hook::SigScan("game", "fontAline2Ptr"), &ourTable[0]);
-
-    HOOK_FUNC(game, GSLfontStretchF);
-    HOOK_FUNC(game, GSLfontStretchWithMaskF);
-    HOOK_FUNC(game, GSLfontStretchWithMaskExF);
-    HOOK_FUNC(game, TipsDataInit);
-    HOOK_FUNC(game, MESsetNGflag);
-    HOOK_FUNC(game, ChatLayout);
-    HOOK_FUNC(game, CalMain);
-    HOOK_FUNC(game, ChatRendering);
     HOOK_FUNC(game, MESdrawTextExF);
-    HOOK_FUNC(game, MESrevDispInit);
-    HOOK_FUNC(game, MESrevDispText);
+
+    if (rd::config::config["patchdef"]["base"]["addNametags"].get<bool>()) {
+        HOOK_FUNC(game, MESrevDispInit);
+        HOOK_FUNC(game, MESrevDispText);
+    }
 }
 
 }  // namespace text

@@ -5,9 +5,10 @@
 #include <lib.hpp>
 #include <hook/trampoline.hpp>
 
-#include <RegionalDialect/Config.h>
-#include <RegionalDialect/System.h>
-#include <RegionalDialect/Text.h>
+#include "RegionalDialect/Config.h"
+#include "RegionalDialect/System.h"
+#include "RegionalDialect/Text.h"
+#include "RegionalDialect/Vm.h"
 
 uintptr_t codeCaves = 0;
 
@@ -33,6 +34,8 @@ HOOK_DEFINE_TRAMPOLINE(MountRom) {
                 Logging.Log("[RegionalDialect] Finished config init.\n");
                 rd::sys::Init();
                 Logging.Log("[RegionalDialect] Finished sys init.\n");
+                rd::vm::Init();
+                Logging.Log("[RegionalDialect] Finished vm init.\n");
                 rd::text::Init(romMount);
                 Logging.Log("[RegionalDialect] Finished initialization.\n");
             } else {

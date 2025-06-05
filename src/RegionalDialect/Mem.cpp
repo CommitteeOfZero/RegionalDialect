@@ -1,14 +1,18 @@
-#include "log/logger_mgr.hpp"
+#include <log/logger_mgr.hpp>
 
-#include "RegionalDialect/Utils.h"
+#include "Mem.h"
 
 extern uintptr_t codeCaves;
 
 namespace rd {
-namespace utils {
+namespace mem {
 
 void Trampoline(uintptr_t address, uintptr_t target, reg::Register reg) {    
     if ((address & 3) || (target & 3) || reg.Index() > 31) ::abort();
+
+    if (address == 0) { Logging.Log("Invalid address. Skipping."); return; }
+    if (target == 0) { Logging.Log("Invalid target. Skipping."); return; }
+
     Overwrite(address,          inst::BranchLink(codeCaves - address).Value());
     Overwrite(codeCaves + 0,    inst::LdrLiteral(reg, 0x8).Value());
     Overwrite(codeCaves + 4,    inst::BranchRegister(reg).Value());
@@ -32,5 +36,5 @@ uintptr_t AssemblePointer(uintptr_t adrp_addr, ptrdiff_t ldr_offset) {
     return pageAddr + offsetFromPageStart;
 }
 
-}  // namespace utils
+}  // namespace mem
 }  // namespace rd

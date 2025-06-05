@@ -87,8 +87,6 @@ DECLARE_HOOK(MESsetNGflag, void, int nameNewline, int rubyEnabled);
 
 DECLARE_HOOK(ChatLayout, int, uint a1, int8_t *a2, uint a3);
 
-DECLARE_HOOK(CalMain, void, long param_1, int32_t *param_2);
-
 DECLARE_HOOK(ChatRendering, void,
             int64_t a1, float a2, float a3, float a4,
             int8_t* a5, unsigned int a6, unsigned int a7,

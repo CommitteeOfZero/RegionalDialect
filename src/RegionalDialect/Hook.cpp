@@ -3,12 +3,12 @@
 #include <string>
 #include <sstream>
 
-#include "log/logger_mgr.hpp"
-#include "skyline/utils/cpputils.hpp"
+#include <log/logger_mgr.hpp>
+#include <skyline/utils/cpputils.hpp>
 
-#include "RegionalDialect/Utils.h"
-#include "RegionalDialect/Hook.h"
-#include "RegionalDialect/Config.h"
+#include "Mem.h"
+#include "Hook.h"
+#include "Config.h"
 
 enum SigExprTokenType {
     Start,
@@ -99,7 +99,7 @@ class SigExprParser {
 
                 if (token.type == Comma && allowComma) {
                     ptrdiff_t offset = expression(false);
-                    result = rd::utils::AssemblePointer(result, offset);
+                    result = rd::mem::AssemblePointer(result, offset);
                     token = lexer.getToken();
                     lexer.nextToken();
                 } 

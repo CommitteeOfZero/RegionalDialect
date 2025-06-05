@@ -1,8 +1,9 @@
 #pragma once
 
+#include <lib.hpp>
+#include <lib/hook/trampoline.hpp>
+
 #include "Config.h"
-#include "lib.hpp"
-#include "lib/hook/trampoline.hpp"
 
 #define DECLARE_HOOK(name, ret, ...)                                            \
     HOOK_DEFINE_TRAMPOLINE(name) { static ret Callback(__VA_ARGS__); };

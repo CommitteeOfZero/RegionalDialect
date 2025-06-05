@@ -2,9 +2,8 @@
 
 #include <string>
 
-#include "cJSON/cJSON.h"
-
-#include "lib/log/logger_mgr.hpp"
+#include <cJSON/cJSON.h>
+#include <lib/log/logger_mgr.hpp>
 
 namespace rd {
 namespace config {
