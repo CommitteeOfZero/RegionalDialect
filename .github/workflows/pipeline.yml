@@ -30,7 +30,7 @@ jobs:
         uses: actions/upload-artifact@v4.1.0
         with:
           name: subsdk9
-          path: ${{ github.workspace }}/output/Release/atmosphere/contents/0100c17017cbc000/exefs/subsdk9
+          path: ${{ github.workspace }}/output/Release/subsdk9
 
       - name: Get Next Version
         id: getver
