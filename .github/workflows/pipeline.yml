@@ -46,7 +46,8 @@ jobs:
         if: github.event_name == 'push' && ((startsWith(github.ref, 'refs/tags') || github.ref_name == 'master'))
         with:
           files: |
-            subsdk9
+            ${{ github.workspace }}/output/Release/subsdk9
+
           tag_name: ${{ steps.getver.outputs.new_tag }}
         env:
           GITHUB_TOKEN: ${{ github.token }}

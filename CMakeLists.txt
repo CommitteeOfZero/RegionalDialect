@@ -103,7 +103,7 @@ else ()
 endif ()
 
 
-install(FILES ${CMAKE_BINARY_DIR}/subsdk9 DESTINATION)
+install(FILES ${CMAKE_BINARY_DIR}/subsdk9 DESTINATION .)
 if (DEFINED ENV{TITLE_ID})
-  install(FILES ${CMAKE_BINARY_DIR}/main.npdm DESTINATION)
+  install(FILES ${CMAKE_BINARY_DIR}/main.npdm DESTINATION .)
 endif ()
