@@ -28,10 +28,6 @@ struct ScriptThreadState {
   /* 014C */ void *pc;
 };
 
-inline void (**SCRuser1)(ScriptThreadState*) = nullptr;
-inline void (**SCRgraph)(ScriptThreadState*) = nullptr;
-inline void (**SCRsystem)(ScriptThreadState*) = nullptr;
-
 DECLARE_HOOK(CalMain, void, ScriptThreadState *param_1, int32_t *param_2);
 
 void Init();

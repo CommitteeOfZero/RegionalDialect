@@ -8,9 +8,11 @@
 namespace rd {
 namespace vm {
 
-void CalMain::Callback(ScriptThreadState *param_1, int32_t *param2) {
-    Orig(param_1, param2);
-}
+typedef void (*VmInstruction)(ScriptThreadState*);
+
+static VmInstruction *SCRuser1 = nullptr;
+static VmInstruction *SCRgraph = nullptr;
+static VmInstruction *SCRsystem = nullptr;
 
 static inline void PopOpcode(ScriptThreadState *thread) {
     thread->pc = reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(thread->pc) + 2);
@@ -73,19 +75,24 @@ static void InsertCustomInstruction(const std::string &name) {
 
     if (*reinterpret_cast<uint32_t*>(address) != 0 &&                       // Non-empty slot
         **reinterpret_cast<uint32_t**>(address) != inst::Ret().Value()) {   // Not a dummy instruction
-        Logging.Log("%s cannot be inserted into slot %d %d: "
+        Logging.Log("%s cannot be inserted into slot %02X %02X: "
                     "Possibly overwriting existing instruction!",
                     name, table, opcode);
         return;
     }
 
     rd::mem::Overwrite(address, reinterpret_cast<uintptr_t>(&GetDic));
+    Logging.Log("%s inserted at %02X %02X!", name, table, opcode);
+}
+
+void CalMain::Callback(ScriptThreadState *param_1, int32_t *param2) {
+    Orig(param_1, param2);
 }
 
 void Init() {
-    SCRuser1 = reinterpret_cast<void(**)(ScriptThreadState*)>(rd::hook::SigScan("game", "SCRuser1"));
-    SCRgraph = reinterpret_cast<void(**)(ScriptThreadState*)>(rd::hook::SigScan("game", "SCRgraph"));
-    SCRsystem = reinterpret_cast<void(**)(ScriptThreadState*)>(rd::hook::SigScan("game", "SCRsystem"));
+    SCRuser1 = reinterpret_cast<decltype(SCRuser1)>(rd::hook::SigScan("game", "SCRuser1"));
+    SCRgraph = reinterpret_cast<VmInstruction*>(rd::hook::SigScan("game", "SCRgraph"));
+    SCRsystem = reinterpret_cast<VmInstruction*>(rd::hook::SigScan("game", "SCRsystem"));
 
     HOOK_FUNC(game, CalMain);
 
