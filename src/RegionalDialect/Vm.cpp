@@ -90,9 +90,9 @@ void CalMain::Callback(ScriptThreadState *param_1, int32_t *param2) {
 }
 
 void Init() {
-    SCRuser1 = reinterpret_cast<decltype(SCRuser1)>(rd::hook::SigScan("game", "SCRuser1"));
-    SCRgraph = reinterpret_cast<VmInstruction*>(rd::hook::SigScan("game", "SCRgraph"));
-    SCRsystem = reinterpret_cast<VmInstruction*>(rd::hook::SigScan("game", "SCRsystem"));
+    HOOK_VAR(game, SCRuser1);
+    HOOK_VAR(game, SCRgraph);
+    HOOK_VAR(game, SCRsystem);
 
     HOOK_FUNC(game, CalMain);
 

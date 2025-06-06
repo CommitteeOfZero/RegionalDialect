@@ -583,25 +583,25 @@ void Init(std::string const& romMount) {
         Logging.Log("Failed to load widths: 0x%x\n", rc);
     }
 
-    MesNameDispLen = (uint*)rd::hook::SigScan("game", "MesNameDispLen");
-    EPmaxPtr = (uint32_t*)rd::hook::SigScan("game", "EPmaxPtr");
-    MEStextDatNumPtr = (uint32_t*)rd::hook::SigScan("game", "MEStextDatNumPtr");
-    MESngFontListTopNumPtr = (uint32_t*)rd::hook::SigScan("game", "MESngFontListTopNumPtr");
-    MESngFontListLastNumPtr = (uint32_t*)rd::hook::SigScan("game", "MESngFontListLastNumPtr");
-    MEStextFl = (uint8_t*)rd::hook::SigScan("game", "MEStextFl");
-    MEStext = (unsigned short*)rd::hook::SigScan("game", "MEStext");
-    MESngFontListLast = (unsigned short*)rd::hook::SigScan("game", "MESngFontListLast");
-    MESngFontListTop = (unsigned short*)rd::hook::SigScan("game", "MESngFontListTop");
-    MesFontColor = (uint8_t*)rd::hook::SigScan("game", "MesFontColor");
-    MESrevLineBufUsePtr = (uint32_t*)rd::hook::SigScan("game", "MESrevLineBufUsePtr");
-    MESrevDispLinePos = (uint32_t*)rd::hook::SigScan("game", "MESrevDispLinePos");
-    MESrevLineBufp = (uint32_t*)rd::hook::SigScan("game", "MESrevLineBufp");
-    MESrevText = (unsigned short*)rd::hook::SigScan("game", "MESrevText");
-    MESrevDispLinePosY = (uint32_t*)rd::hook::SigScan("game", "MESrevDispLinePosY");
-    MESrevTextSize = (uint8_t*)rd::hook::SigScan("game", "MESrevTextSize");
-    MESrevTextPos = (uint32_t*)rd::hook::SigScan("game", "MESrevTextPos");
-    MESrevDispPosPtr = (uint32_t*)rd::hook::SigScan("game", "MESrevDispPosPtr");
-    MESrevDispMaxPtr = (uint32_t*)rd::hook::SigScan("game", "MESrevDispMaxPtr");
+    HOOK_VAR(game, MesNameDispLen);
+    HOOK_VAR(game, EPmaxPtr);
+    HOOK_VAR(game, MEStextDatNumPtr);
+    HOOK_VAR(game, MESngFontListTopNumPtr);
+    HOOK_VAR(game, MESngFontListLastNumPtr);
+    HOOK_VAR(game, MEStextFl);
+    HOOK_VAR(game, MEStext);
+    HOOK_VAR(game, MESngFontListLast);
+    HOOK_VAR(game, MESngFontListTop);
+    HOOK_VAR(game, MesFontColor);
+    HOOK_VAR(game, MESrevLineBufUsePtr);
+    HOOK_VAR(game, MESrevDispLinePos);
+    HOOK_VAR(game, MESrevLineBufp);
+    HOOK_VAR(game, MESrevText);
+    HOOK_VAR(game, MESrevDispLinePosY);
+    HOOK_VAR(game, MESrevTextSize);
+    HOOK_VAR(game, MESrevTextPos);
+    HOOK_VAR(game, MESrevDispPosPtr);
+    HOOK_VAR(game, MESrevDispMaxPtr);
 
     if (rd::config::config["patchdef"]["base"]["hookText"].get<bool>()) {
         uintptr_t englishOnlyOffsetTable = rd::hook::SigScan("game", "englishOnlyOffsetTable");

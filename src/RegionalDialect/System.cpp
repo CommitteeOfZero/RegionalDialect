@@ -121,14 +121,14 @@ bool ChkViewDic::Callback(uint param_1, uint param_2) {
 }
 
 void Init() {
-    ScrWork = (int32_t*)rd::hook::SigScan("game", "ScrWork");
-    OPTmenuModePtr = (uint32_t*)rd::hook::SigScan("game", "OPTmenuModePtr");
-    OPTmenuCur = (uint8_t*)rd::hook::SigScan("game", "OPTmenuCur");
-    OPTmenuPagePtr = (uint32_t*)rd::hook::SigScan("game", "OPTmenuPagePtr");
-    PADcustom = (uint32_t*)rd::hook::SigScan("game", "PADcustom");
-    PADrefPtr = (uint32_t*)rd::hook::SigScan("game", "PADrefPtr");
-    PADonePtr = (uint32_t*)rd::hook::SigScan("game", "PADonePtr");
-    SYSSEvolPtr = (uint32_t*)rd::hook::SigScan("game", "SYSSEvolPtr");
+    HOOK_VAR(game, ScrWork);
+    HOOK_VAR(game, OPTmenuModePtr);
+    HOOK_VAR(game, OPTmenuCur);
+    HOOK_VAR(game, OPTmenuPagePtr);
+    HOOK_VAR(game, PADcustom);
+    HOOK_VAR(game, PADrefPtr);
+    HOOK_VAR(game, PADonePtr);
+    HOOK_VAR(game, SYSSEvolPtr);
 
     if (rd::config::config["gamedef"]["signatures"]["game"].has("SaveMenuGuide")) {
         uint32_t *SaveMenuGuide = (uint32_t*)rd::hook::SigScan("game", "SaveMenuGuide");
