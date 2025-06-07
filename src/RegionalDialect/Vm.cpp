@@ -8,7 +8,7 @@
 namespace rd {
 namespace vm {
 
-typedef void (*VmInstruction)(ScriptThreadState*);
+using VmInstruction = void (*)(ScriptThreadState*);
 
 static VmInstruction *SCRuser1 = nullptr;
 static VmInstruction *SCRgraph = nullptr;
@@ -77,12 +77,12 @@ static void InsertCustomInstruction(const std::string &name) {
         **reinterpret_cast<uint32_t**>(address) != inst::Ret().Value()) {   // Not a dummy instruction
         Logging.Log("%s cannot be inserted into slot %02X %02X: "
                     "Possibly overwriting existing instruction!",
-                    name, table, opcode);
+                    name.c_str(), table, opcode);
         return;
     }
 
     rd::mem::Overwrite(address, reinterpret_cast<uintptr_t>(&GetDic));
-    Logging.Log("%s inserted at %02X %02X!", name, table, opcode);
+    Logging.Log("%s inserted at %02X %02X!", name.c_str(), table, opcode);
 }
 
 void CalMain::Callback(ScriptThreadState *param_1, int32_t *param2) {
