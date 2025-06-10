@@ -21,6 +21,9 @@ void transformFontAtlasCoordinates(
     float& uv_x, float& uv_y, float& uv_w, float& uv_h,
     float& pos_x0, float& pos_y0, float& pos_x1, float& pos_y1
 ) {
+
+    if (!rd::config::config["patchdef"]["transformAtlas"].get<bool>()) return;
+
     const float margin = 8;
     const float size = 48;
     const float newSize = 48 + margin*2;
