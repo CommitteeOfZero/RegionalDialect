@@ -22,7 +22,7 @@ void transformFontAtlasCoordinates(
     float& pos_x0, float& pos_y0, float& pos_x1, float& pos_y1
 ) {
 
-    if (!rd::config::config["patchdef"]["transformAtlas"].get<bool>()) return;
+    if (!rd::config::config["patchdef"]["base"]["transformAtlas"].get<bool>()) return;
 
     const float margin = 8;
     const float size = 48;
