@@ -7,10 +7,7 @@ if (NOT SWITCH)
 endif ()
 
 ## Title Id
-if (DEFINED ENV{TITLE_ID})
-  set(TITLE_ID $ENV{TITLE_ID})
-else()
-  set(TITLE_ID 0100000000010000) # Default min titleID (doesn't matter for execution, only for NPDM)
+set(TITLE_ID CACHE STRING 0100000000010000) # Default min titleID (doesn't matter for execution, only for NPDM)
 endif()
 set(CONFIG_TITLE_ID 0x${TITLE_ID})
 add_compile_definitions(EXL_PROGRAM_ID=${CONFIG_TITLE_ID} NNSDK=1)

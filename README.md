@@ -10,17 +10,31 @@ Additionally, a Dockerfile is also provided to build without needing to install 
 
 ### Local Environment
 Ensure the `DEVKITPRO` environment variable is set to the devkitpro toolchain location.
+
 Run cmake to build
 `cmake --preset Release . && cmake --build . --preset Release` 
-> The `CMakePresets.json` file contains configuration for the build, parameters can be overridden with command line cache variables, or through a local `CMakeUserPresets.json`
+> The `CMakePresets.json` file contains configuration for the build, parameters can be overridden with command line cache variables, or through a local `CMakeUserPresets.json`, keep in mind that presets must not share names.
+> For instance, you can add the following to one of the configure presets to override the title ID to use Chaos;Head NoAH.
+```
+"cacheVariables": {
+  "TITLE_ID": "0100c17017cbc000"
+}
+```
 
 ### Docker
 Build the docker image
+
 `docker build -t regiondialect-build .`
+
 Run the container and mount it to the project directory, you can substitute <PROJECT_DIRECTORY> with ${PWD} on PowerShell and %cd% on bash 
+
 `docker run --rm -it -v <PROJECT_DIRECTORY>:/workspace regiondialect-build bash`
+
 Run cmake to build
+
 `cmake --preset Release . && cmake --build . --preset Release` 
+
+Add in the flag `-DTITLE_ID=<game_id_here>` to generate a npdm with the corresponding game's title ID. 
 
 ## Post Build
 Once built, copy the subsd9 file into the exefs directory corresponding to the game. A gamedef.json and main.npdm file tailored to the specific game is also necessary for the mod to function. 
