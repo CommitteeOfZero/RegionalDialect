@@ -7,8 +7,7 @@ if (NOT SWITCH)
 endif ()
 
 ## Title Id
-set(TITLE_ID CACHE STRING 0100000000010000) # Default min titleID (doesn't matter for execution, only for NPDM)
-endif()
+set(TITLE_ID "0100000000010000" CACHE STRING "Title ID for Switch game") # Default min titleID (doesn't matter for execution, only for NPDM)
 set(CONFIG_TITLE_ID 0x${TITLE_ID})
 add_compile_definitions(EXL_PROGRAM_ID=${CONFIG_TITLE_ID} NNSDK=1)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/module/subsdk9.json.template ${CMAKE_CURRENT_BINARY_DIR}/subsdk9.json)
@@ -88,12 +87,12 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/module/subsdk9.specs.template ${CMAKE
 ## Build nso & generate npdm
 add_nso_target_subsdk(subsdk9)
 set_target_properties(subsdk9 PROPERTIES CONFIG_JSON "${CMAKE_CURRENT_BINARY_DIR}/subsdk9.json")
-if (DEFINED ENV{TITLE_ID})
+if (NOT TITLE_ID STREQUAL "0100000000010000")
   __generate_npdm(subsdk9)
 endif ()
 set_target_properties(subsdk9 PROPERTIES LINK_FLAGS "-specs ${CMAKE_BINARY_DIR}/subsdk9.specs -g3 ${ARCH} -nostartfiles")
 
-if (DEFINED ENV{TITLE_ID})
+if (NOT TITLE_ID STREQUAL "0100000000010000")
   add_custom_target(subsdk9_meta DEPENDS create_npdm subsdk9_nso)
 else ()
   add_custom_target(subsdk9_meta DEPENDS subsdk9_nso)
@@ -101,6 +100,6 @@ endif ()
 
 
 install(FILES ${CMAKE_BINARY_DIR}/subsdk9 DESTINATION .)
-if (DEFINED ENV{TITLE_ID})
+if (NOT TITLE_ID STREQUAL "0100000000010000")
   install(FILES ${CMAKE_BINARY_DIR}/main.npdm DESTINATION .)
 endif ()
