@@ -11,6 +11,9 @@ set(TITLE_ID "0100000000010000" CACHE STRING "Title ID for Switch game") # Defau
 set(CONFIG_TITLE_ID 0x${TITLE_ID})
 add_compile_definitions(EXL_PROGRAM_ID=${CONFIG_TITLE_ID} NNSDK=1)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/module/subsdk9.json.template ${CMAKE_CURRENT_BINARY_DIR}/subsdk9.json)
+file(READ ${CMAKE_CURRENT_BINARY_DIR}/subsdk9.json JSON_CONTENTS)
+string(REGEX REPLACE "\"title_id\": \"0x[0-9a-fA-F]+\"" "\"title_id\": \"0x${TITLE_ID}\"" JSON_CONTENTS "${JSON_CONTENTS}")
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/subsdk9.json "${JSON_CONTENTS}")
 
 ## subsdk9
 set(CMAKE_EXECUTABLE_SUFFIX ".elf")
