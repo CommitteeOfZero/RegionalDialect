@@ -7,7 +7,7 @@ namespace sys {
 
 inline int32_t *ScrWork = nullptr;
 inline uint32_t *OPTmenuModePtr = nullptr;
-inline uint8_t *OPTmenuCur = nullptr;
+inline uint32_t *OPTmenuCur = nullptr;
 inline uint32_t *OPTmenuPagePtr = nullptr;
 inline uint32_t *PADcustom = nullptr;
 inline uint32_t *PADrefPtr = nullptr;

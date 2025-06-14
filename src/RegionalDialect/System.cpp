@@ -1,3 +1,5 @@
+#include <cstring>
+
 #include "System.h"
 #include "Mem.h"
 
@@ -58,22 +60,44 @@ ToggleSel NPToggleSel = INVALID;
 void OptionDispChip2::Callback(uint param_1) {
     Orig(param_1);
 
-    // Nametag option text
-    GSLflatRectF::Callback(152, (*OPTmenuModePtr == 2 && OPTmenuCur[*OPTmenuPagePtr * 4] == 3) * 577.0f, 2959.0f, 147.0f, 35.0f, 242.0f, 602.0f, 0xFFFFFF, param_1, 1);
-    // Divider
-    GSLflatRectF::Callback(152, 0.0f, 1346.0f, 1443.0f, 6.0f, 238.0f, 643.0f, 0xFFFFFF, param_1, 1);
+    const bool selecting = *OPTmenuModePtr == 2 && OPTmenuCur[*OPTmenuPagePtr] == 3;
+    const char *layout = rd::config::config["patchdef"]["base"]["nametagOptionLayout"].get<char*>();
+    if (layout == NULL) return;
 
-    // On/Off checkboxes
-    GSLflatRectF::Callback(152, 1449.0f, 1086.0f, 115.0f, 40.0f, 1411.0f, 601.0f, 0xFFFFFF, param_1, 1);
-    GSLflatRectF::Callback(152, 1449.0f, 1126.0f, 115.0f, 40.0f, 1537.0f, 601.0f, 0xFFFFFF, param_1, 1);
+    if (std::strcmp(layout, "chnjpn") == 0) {
+        // Nametag option text
+        GSLflatRectF::Callback(152, 0.0f, 2326.0f + (int)(selecting) * 40.0f, 640.0f, 34.0f, 242.0f, 605.0f, 0xFFFFFF, param_1, 1);
+        // Divider
+        GSLflatRectF::Callback(152, 0.0f, 1346.0f, 1443.0f, 6.0f, 238.0f, 643.0f, 0xFFFFFF, param_1, 1);
 
-    if (*OPTmenuModePtr == 2 && OPTmenuCur[*OPTmenuPagePtr * 4] == 3) {
-        // Hover marker while selecting
-        GSLflatRectF::Callback(152, 1517.0f, 1408.0f, 42.0f, 42.0f, 1414.0f + 126.0f * (int)(NPToggleSel == OFF), 596.0f, 0xFFFFFF, param_1, 1);
+        // On/Off checkboxes
+        GSLflatRectF::Callback(152, 1449.0f, 1086.0f, 449.0f, 38.0f, 1221.0f, 601.0f, 0xFFFFFF, param_1, 1);
+
+        if (selecting) {
+            // Hover marker while selecting
+            GSLflatRectF::Callback(152, 1517.0f, 1396.0f, 42.0f, 42.0f, 1428.0f + 127.0f * (int)(NPToggleSel == OFF), 595.0f, 0xFFFFFF, param_1, 1);
+        }
+
+        // Checkmark on currently toggled option
+        GSLflatRectF::Callback(152, 1565.0f, 1396.0f, 42.0f, 42.0f, 1428.0f + 127.0f * (int)(!GetFlag::Callback(801)), 595.0f, 0xFFFFFF, param_1, 1);
+    } else if (std::strcmp(layout, "chneng") == 0) {
+        // Nametag option text
+        GSLflatRectF::Callback(152, (int)selecting * 577.0f, 2959.0f, 147.0f, 35.0f, 242.0f, 602.0f, 0xFFFFFF, param_1, 1);
+        // Divider
+        GSLflatRectF::Callback(152, 0.0f, 1346.0f, 1443.0f, 6.0f, 238.0f, 643.0f, 0xFFFFFF, param_1, 1);
+
+        // On/Off checkboxes
+        GSLflatRectF::Callback(152, 1449.0f, 1086.0f, 115.0f, 40.0f, 1411.0f, 601.0f, 0xFFFFFF, param_1, 1);
+        GSLflatRectF::Callback(152, 1449.0f, 1126.0f, 115.0f, 40.0f, 1537.0f, 601.0f, 0xFFFFFF, param_1, 1);
+        
+        if (selecting) {
+            // Hover marker while selecting
+            GSLflatRectF::Callback(152, 1517.0f, 1408.0f, 42.0f, 42.0f, 1414.0f + 126.0f * (int)(NPToggleSel == OFF), 596.0f, 0xFFFFFF, param_1, 1);
+        }
+
+        // Checkmark on currently toggled option
+        GSLflatRectF::Callback(152, 1565.0f, 1408.0f, 42.0f, 42.0f, 1413.0f + 126.0f * (int)(!GetFlag::Callback(801)), 596.0f, 0xFFFFFF, param_1, 1);
     }
-
-    // Checkmark on currently toggled option
-    GSLflatRectF::Callback(152, 1565.0f, 1408.0f, 42.0f, 42.0f, 1413.0f + 126.0f * (int)(!GetFlag::Callback(801)), 596.0f, 0xFFFFFF, param_1, 1);
 }
 
 void SSEvolume::Callback(uint param_1) {
@@ -85,10 +109,10 @@ void SSEplay::Callback(int param_1, int param_2 = 0xFFFFFFFF) {
 }
 
 void OptionMain::Callback(void) {
-    if (*OPTmenuModePtr != 2 || OPTmenuCur[*OPTmenuPagePtr * 4] != 3) {
+    if (*OPTmenuModePtr != 2 || OPTmenuCur[*OPTmenuPagePtr] != 3) {
         Orig();
         
-        if (*OPTmenuModePtr == 2 && OPTmenuCur[*OPTmenuPagePtr * 4] == 3) NPToggleSel = (ToggleSel)GetFlag::Callback(801);
+        if (*OPTmenuModePtr == 2 && OPTmenuCur[*OPTmenuPagePtr] == 3) NPToggleSel = (ToggleSel)GetFlag::Callback(801);
         return;
     }
     
