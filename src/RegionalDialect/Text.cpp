@@ -527,12 +527,18 @@ void MESrevDispInit::Callback(void) {
     
     if (!rd::sys::GetFlag::Callback(801)) return;
 
+    int voicedCount = 0;
+
     for (uint32_t i = 0; i < *MESrevLineBufUsePtr; i++) {
-        if ((short)MESrevText[MESrevLineBufp[MESrevDispLinePos[i]]] < 0) {
-            *MESrevDispMaxPtr += 30; *MESrevDispPosPtr += 30;
-            for (uint32_t j = i; j < *MESrevLineBufUsePtr; j++) MESrevDispLinePosY[j] += 30;
+        if (reinterpret_cast<short*>(MESrevText)[MESrevLineBufp[MESrevDispLinePos[i]]] < 0) {
+            *MESrevDispMaxPtr += 45; voicedCount++;
         }
+        
+        MESrevDispLinePosY[i] += 45 * voicedCount;
     }
+
+    // Underflow workaround
+    *MESrevDispPosPtr = std::max<uint32_t>(*MESrevDispMaxPtr, 506) - 506;
 }
 
 void MESrevDispText::Callback(int fontSurfaceId, int maskSurfaceId, int param3, int param4,
@@ -545,13 +551,13 @@ void MESrevDispText::Callback(int fontSurfaceId, int maskSurfaceId, int param3, 
 
     for (uint32_t i = 0; i < *MESrevLineBufUsePtr; i++) {
         if ((short)MESrevText[MESrevLineBufp[MESrevDispLinePos[i]]] < 0) {
-            uint32_t iVar5 = (MESrevDispLinePosY[i] + param4) - *MESrevDispPosPtr - 17;
+            uint32_t iVar5 = (MESrevDispLinePosY[i] + param4) - *MESrevDispPosPtr - 30;
             uint32_t widthAccum = 150;
-            for (uint nametagIndex = MESrevLineBufp[MESrevDispLinePos[i]] + 1;
-                (short)MESrevText[nametagIndex] > 0;
+            for (size_t nametagIndex = MESrevLineBufp[MESrevDispLinePos[i]] + 1;
+                reinterpret_cast<short*>(MESrevText)[nametagIndex] > 0;
                 nametagIndex++) {
             
-                uint32_t iVar15 = iVar5 + *(short*)((long)MESrevTextPos + (ulong)(nametagIndex << 1 | 1) * 2);
+                uint32_t iVar15 = iVar5 + MESrevTextPos[nametagIndex << 1 | 1];
                 uint32_t currWidth = (28 * ourTable[MESrevText[nametagIndex]] / 32) * 1.5f;
 
                 GSLfontStretchWithMaskF::Callback(

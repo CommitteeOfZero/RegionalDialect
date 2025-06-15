@@ -44,7 +44,7 @@ void SpeakerDrawingFunction::Callback(float param1, float param2, float param3, 
                                   float param6, int param7,   int param8,   uint param9,  int param10) {
 
     if (GetFlag::Callback(801) && param1 == 28.0f && param3 == 42.0f && param4 == 36.0f && param5 == 93.0f)
-        param6 -= 45.0f;
+        param6 -= 65.0f;
 
     Orig(param1, param2, param3, param4, param5, param6, param7, param8, param9, param10);
 }
