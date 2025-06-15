@@ -55,6 +55,10 @@ template<> std::vector<char*> JsonWrapper::get<std::vector<char*>>() {
     return ret;
 }
 
+template<> float JsonWrapper::get<float>() {
+    return static_cast<float>(::cJSON_GetNumberValue(inner));
+}
+
 bool JsonWrapper::has(const std::string &item) {
     return ::cJSON_HasObjectItem(inner, item.c_str()) == 1;
 }
@@ -128,6 +132,7 @@ template size_t JsonWrapper::get<size_t>();
 template char *JsonWrapper::get<char*>();
 template std::vector<char*> JsonWrapper::get<std::vector<char*>>();
 template bool JsonWrapper::get<bool>();
+template float JsonWrapper::get<float>();
 
 }  // namespace config
 }  // namespace rd

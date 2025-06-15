@@ -1,6 +1,7 @@
 #include <math.h>
 #include <list>
 #include <vector>
+#include <functional>
 
 #include <skyline/utils/cpputils.hpp>
 #include <log/logger_mgr.hpp>
@@ -10,6 +11,10 @@
 #include "Vm.h"
 #include "Text.h"
 
+#define DIALOGUE_FONT_SURFACE_ID    91
+#define OUTLINE_FONT_SURFACE_ID  /* 93 */ \
+    (DIALOGUE_FONT_SURFACE_ID + 2) 
+
 extern "C" {
     void englishTipsBranchFix(void);
 }
@@ -17,16 +22,48 @@ extern "C" {
 namespace rd {
 namespace text {
 
+static float s_AtlasDialogueMargin = 0.0f;
+static float s_AtlasOutlineMargin = 0.0f;
+static float s_DialogueOutlineOffset = 0.0f;
+static bool s_OutlinedFont = false;
+
+static int s_CurrentShadowFont = DIALOGUE_FONT_SURFACE_ID;
+
+static bool s_NametagImplementation = false;
+
 void transformFontAtlasCoordinates(
+    int &fontSurfaceId, uint &color,
     float& uv_x, float& uv_y, float& uv_w, float& uv_h,
     float& pos_x0, float& pos_y0, float& pos_x1, float& pos_y1
 ) {
+    
+    float margin = 0.0f;
 
-    if (!rd::config::config["patchdef"]["base"]["transformAtlas"].get<bool>()) return;
+    // Black used for font shadow, so switch to outline font
+    if (s_OutlinedFont && color == 0x00000000u)
+        fontSurfaceId = s_CurrentShadowFont;
 
-    const float margin = 8;
-    const float size = 48;
-    const float newSize = 48 + margin*2;
+    switch (fontSurfaceId) {
+        case DIALOGUE_FONT_SURFACE_ID:
+            margin = s_AtlasDialogueMargin;
+            break;
+        case OUTLINE_FONT_SURFACE_ID:
+            margin = s_OutlinedFont ? s_AtlasOutlineMargin : s_AtlasDialogueMargin;
+            break;
+        default:
+            UNREACHABLE;
+    }
+
+    if (margin == 0.0f) return;
+
+    if (s_OutlinedFont && fontSurfaceId == OUTLINE_FONT_SURFACE_ID) {
+        for (const auto &coord : std::array<std::reference_wrapper<float>, 4>
+            { pos_x0, pos_x1, pos_y0, pos_y1 })
+            coord.get() += s_DialogueOutlineOffset;
+    }  
+
+    const float size = 48.0f;
+    const float newSize = size + margin * 2;
 
     float scale_x = (pos_x1 - pos_x0) / uv_w;
     float scale_y = (pos_y1 - pos_y0) / uv_h;
@@ -242,7 +279,6 @@ void processSc3TokenList(int xOffset, int yOffset,int lineLength,
     result->usedLineLength = curLineLength ? curLineLength : prevLineLength;
 }
 
-
 int GSLfontStretchF::Callback(
     int fontSurfaceId,
     float uv_x, float uv_y, float uv_w, float uv_h,
@@ -250,14 +286,16 @@ int GSLfontStretchF::Callback(
     uint color, int opacity, bool shrink
 ) {
 
-    if (rd::config::config["patchdef"]["base"]["addNametags"].get<bool>() &&
-        fontSurfaceId == 91 && (pos_y0 == 760.5f || pos_y0 == 757.5f)) {
+    if (s_NametagImplementation &&
+        fontSurfaceId == DIALOGUE_FONT_SURFACE_ID &&
+        (pos_y0 == 760.5f || pos_y0 == 757.5f)) {
         if (!rd::sys::GetFlag::Callback(801)) return 0;
         float offset = (MesNameDispLen[0] * 1.5f) / 2.0f;
         pos_x0 += offset; pos_x1 += offset;
     }
 
     transformFontAtlasCoordinates(
+        fontSurfaceId, color,
         uv_x, uv_y, uv_w, uv_h,
         pos_x0, pos_y0, pos_x1, pos_y1
     );
@@ -277,6 +315,7 @@ int GSLfontStretchWithMaskF::Callback(
     uint color, int opacity
 ) {
     transformFontAtlasCoordinates(
+        fontSurfaceId, color,
         uv_x, uv_y, uv_w, uv_h,
         pos_x0, pos_y0, pos_x1, pos_y1
     );
@@ -297,6 +336,7 @@ int GSLfontStretchWithMaskExF::Callback(
     uint color, int opacity
 ) {
     transformFontAtlasCoordinates(
+        fontSurfaceId, color,
         uv_x, uv_y, uv_w, uv_h,
         pos_x0, pos_y0, pos_x1, pos_y1
     );
@@ -583,6 +623,12 @@ void MESrevDispText::Callback(int fontSurfaceId, int maskSurfaceId, int param3, 
     Orig(fontSurfaceId, maskSurfaceId, param3, param4, param5, param6, param7);
 }
 
+void MEStvramDrawEx::Callback(int param_1, ulong param_2, int param_3, int param_4, int param_5) {
+    s_CurrentShadowFont = OUTLINE_FONT_SURFACE_ID;
+    Orig(param_1, param_2, param_3, param_4, param_5);
+    s_CurrentShadowFont = DIALOGUE_FONT_SURFACE_ID;
+}
+
 void Init(std::string const& romMount) {
     Result rc = 0;
     rc = skyline::utils::readFile(romMount + "system/widths.bin", 0, &ourTable[0], 8000);
@@ -629,6 +675,15 @@ void Init(std::string const& romMount) {
         if (rd::config::config["gamedef"]["signatures"]["game"].has("fontAline2Ptr"))
             rd::mem::Overwrite(rd::hook::SigScan("game", "fontAline2Ptr"), &ourTable[0]);
 
+        s_AtlasDialogueMargin = rd::config::config["patchdef"]["base"]["atlasDialogueMargin"].get<float>();
+        s_AtlasOutlineMargin = rd::config::config["patchdef"]["base"]["atlasOutlineMargin"].get<float>();
+        s_DialogueOutlineOffset = rd::config::config["patchdef"]["base"]["dialogueOutlineOffset"].get<float>();
+
+        if (rd::config::config["patchdef"]["base"]["outlinedFont"].get<bool>()) {
+            s_OutlinedFont = true;
+            HOOK_FUNC(game, MEStvramDrawEx);
+        }
+
         HOOK_FUNC(game, GSLfontStretchF);
         HOOK_FUNC(game, GSLfontStretchWithMaskF);
         HOOK_FUNC(game, GSLfontStretchWithMaskExF);
@@ -659,6 +714,7 @@ void Init(std::string const& romMount) {
     HOOK_FUNC(game, MESdrawTextExF);
 
     if (rd::config::config["patchdef"]["base"]["addNametags"].get<bool>()) {
+        s_NametagImplementation = true;
         HOOK_FUNC(game, MESrevDispInit);
         HOOK_FUNC(game, MESrevDispText);
     }

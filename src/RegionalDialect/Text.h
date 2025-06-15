@@ -102,6 +102,9 @@ DECLARE_HOOK(MESrevDispText, void,
             int fontSurfaceId, int maskSurfaceId, int param3, int param4,
             int param5, int param6, int param7);
 
+DECLARE_HOOK(MEStvramDrawEx, void,
+            int param_1, ulong param_2, int param_3, int param_4, int param_5);
+            
 void Init(std::string const& romMount);
 
 }  // namespace text
