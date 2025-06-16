@@ -1,4 +1,5 @@
-#include <cstring>
+#include <string_view>
+#include <optional>
 
 #include "System.h"
 #include "Mem.h"
@@ -6,20 +7,18 @@
 namespace rd {
 namespace sys {
 
-enum NametagOptionLayout {
-    NONE,
+enum class NametagOptionLayoutImpl {
     CHNENG,
     CHNJPN
 };
 
-enum NametagOptionLayout NametagOptionLayoutFromString(const char *from) {
-    if (from == NULL) return NONE;
-    if (::strcmp(from, "chneng") == 0) return CHNENG;
-    if (::strcmp(from, "chnjpn") == 0) return CHNJPN;
-    return NONE;
+std::optional<NametagOptionLayoutImpl> NametagOptionLayoutFromString(std::string_view from) {
+    if (from == "chneng") return NametagOptionLayoutImpl::CHNENG;
+    if (from == "chnjpn") return NametagOptionLayoutImpl::CHNJPN;
+    return {};
 }
 
-static enum NametagOptionLayout s_NametagOptionLayout = NONE;
+static auto NametagOptionLayout = std::optional<NametagOptionLayoutImpl>();
 
 void GSLflatRectF::Callback(int textureId, float spriteX, float spriteY,
                         float spriteWidth, float spriteHeight, float displayX,
@@ -64,22 +63,23 @@ void SpeakerDrawingFunction::Callback(float param1, float param2, float param3, 
     Orig(param1, param2, param3, param4, param5, param6, param7, param8, param9, param10);
 }
 
-enum ToggleSel {
+enum class ToggleSel : uint8_t {
     OFF,
     ON,
-    INVALID
 };
 
-ToggleSel NPToggleSel = INVALID;
+static auto NPToggleSel = std::optional<ToggleSel>();
 
+// OptionMain always gets called first, so we can safely dereference NametagOptionLayout
 void OptionDispChip2::Callback(uint param_1) {
     Orig(param_1);
 
+    if (!NametagOptionLayout) return;
+
     const bool selecting = *OPTmenuModePtr == 2 && OPTmenuCur[*OPTmenuPagePtr] == 3;
 
-    switch (s_NametagOptionLayout) {
-        case NONE: break;
-        case CHNJPN: {
+    switch (*NametagOptionLayout) {
+        case NametagOptionLayoutImpl::CHNJPN: {
             // Nametag option text
             GSLflatRectF::Callback(152, 0.0f, 2326.0f + (int)(selecting) * 40.0f, 640.0f, 34.0f, 242.0f, 605.0f, 0xFFFFFF, param_1, 1);
             // Divider
@@ -90,7 +90,7 @@ void OptionDispChip2::Callback(uint param_1) {
 
             if (selecting) {
                 // Hover marker while selecting
-                GSLflatRectF::Callback(152, 1517.0f, 1396.0f, 42.0f, 42.0f, 1428.0f + 127.0f * (int)(NPToggleSel == OFF), 595.0f, 0xFFFFFF, param_1, 1);
+                GSLflatRectF::Callback(152, 1517.0f, 1396.0f, 42.0f, 42.0f, 1428.0f + 127.0f * (int)(*NPToggleSel == ToggleSel::OFF), 595.0f, 0xFFFFFF, param_1, 1);
             }
 
             // Checkmark on currently toggled option
@@ -98,7 +98,7 @@ void OptionDispChip2::Callback(uint param_1) {
             
             break;
         } 
-        case CHNENG: {
+        case NametagOptionLayoutImpl::CHNENG: {
         // Nametag option text
             GSLflatRectF::Callback(152, (int)selecting * 577.0f, 2959.0f, 147.0f, 35.0f, 242.0f, 602.0f, 0xFFFFFF, param_1, 1);
             // Divider
@@ -110,7 +110,7 @@ void OptionDispChip2::Callback(uint param_1) {
             
             if (selecting) {
                 // Hover marker while selecting
-                GSLflatRectF::Callback(152, 1517.0f, 1408.0f, 42.0f, 42.0f, 1414.0f + 126.0f * (int)(NPToggleSel == OFF), 596.0f, 0xFFFFFF, param_1, 1);
+                GSLflatRectF::Callback(152, 1517.0f, 1408.0f, 42.0f, 42.0f, 1414.0f + 126.0f * (int)(*NPToggleSel == ToggleSel::OFF), 596.0f, 0xFFFFFF, param_1, 1);
             }
 
             // Checkmark on currently toggled option
@@ -118,6 +118,8 @@ void OptionDispChip2::Callback(uint param_1) {
         
             break;
         }
+        default:
+            UNREACHABLE;
     }
 }
 
@@ -148,11 +150,11 @@ void OptionMain::Callback(void) {
     if (((PADcustom[2] | PADcustom[3]) & *PADrefPtr) != 0) {
         SSEvolume::Callback(*SYSSEvolPtr);
         SSEplay::Callback(1);
-        NPToggleSel = ToggleSel(NPToggleSel ^ 1);
+        NPToggleSel = ToggleSel(static_cast<uint8_t>(*NPToggleSel) ^ 1);
     } else if ((PADcustom[5] & *PADonePtr) != 0) {
         SSEvolume::Callback(*SYSSEvolPtr);
         SSEplay::Callback(2);
-        SetFlag::Callback(801, NPToggleSel);
+        SetFlag::Callback(801, static_cast<uint8_t>(*NPToggleSel));
         *OPTmenuModePtr = 1; 
     } else if ((PADcustom[6] & *PADonePtr) != 0) {
         SSEvolume::Callback(*SYSSEvolPtr);
@@ -213,8 +215,8 @@ void Init() {
             OPTmenuMaxCur[4] = 4;
         }
 
-        s_NametagOptionLayout = NametagOptionLayoutFromString(
-            rd::config::config["patchdef"]["base"]["nametagOptionLayout"].get<char*>()
+        NametagOptionLayout = NametagOptionLayoutFromString(
+            rd::config::config["patchdef"]["base"]["nametagOptionLayout"].get<std::string_view>()
         );
 
         HOOK_FUNC(game, SpeakerDrawingFunction);

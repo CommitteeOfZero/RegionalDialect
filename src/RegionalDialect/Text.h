@@ -104,8 +104,8 @@ DECLARE_HOOK(MESrevDispText, void,
 
 DECLARE_HOOK(MEStvramDrawEx, void,
             int param_1, ulong param_2, int param_3, int param_4, int param_5);
-            
-void Init(std::string const& romMount);
+
+void Init(std::string const &romMount);
 
 }  // namespace text
 }  // namespace rd

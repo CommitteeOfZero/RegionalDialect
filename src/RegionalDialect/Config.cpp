@@ -1,6 +1,7 @@
 
 #include <vector>
 #include <concepts>
+#include <string_view>
 
 #include <log/logger_mgr.hpp>
 #include <skyline/utils/cpputils.hpp>
@@ -27,8 +28,8 @@ JsonWrapper& JsonWrapper::operator=(JsonWrapper&& other) noexcept {
     return *this;
 }
 
-JsonWrapper JsonWrapper::operator[](const std::string &item) {
-    return JsonWrapper(::cJSON_GetObjectItem(inner, item.c_str()));
+JsonWrapper JsonWrapper::operator[](std::string_view item) {
+    return JsonWrapper(::cJSON_GetObjectItem(inner, item.data()));
 }
 
 template<> int JsonWrapper::get<int>() {
@@ -39,19 +40,22 @@ template<> size_t JsonWrapper::get<size_t>() {
     return static_cast<size_t>(::cJSON_GetNumberValue(inner));
 }
 
-template<> char* JsonWrapper::get<char*>() {
-    return ::cJSON_GetStringValue(inner);
+template<> std::string_view JsonWrapper::get<std::string_view>() {
+    char *ret = ::cJSON_GetStringValue(inner);
+    return ret ? std::string_view { ret } : std::string_view { };
 }
 
 template<> bool JsonWrapper::get<bool>() {
     return static_cast<bool>(::cJSON_IsTrue(inner));
 }
 
-template<> std::vector<char*> JsonWrapper::get<std::vector<char*>>() {
+template<> std::vector<std::string_view> JsonWrapper::get<std::vector<std::string_view>>() {
     size_t size = (size_t)::cJSON_GetArraySize(inner);
-    auto ret = std::vector<char*>();
+    auto ret = std::vector<std::string_view>();
+    ret.reserve(size);
+
     for (size_t i = 0; i < size; i++)
-        ret.push_back(JsonWrapper(::cJSON_GetArrayItem(inner, i)).get<char*>());
+        ret.emplace_back(JsonWrapper(::cJSON_GetArrayItem(inner, i)).get<std::string_view>());
     return ret;
 }
 
@@ -59,8 +63,8 @@ template<> float JsonWrapper::get<float>() {
     return static_cast<float>(::cJSON_GetNumberValue(inner));
 }
 
-bool JsonWrapper::has(const std::string &item) {
-    return ::cJSON_HasObjectItem(inner, item.c_str()) == 1;
+bool JsonWrapper::has(std::string_view item) {
+    return ::cJSON_HasObjectItem(inner, item.data()) == 1;
 }
 
 void JsonWrapper::print() {
@@ -69,7 +73,7 @@ void JsonWrapper::print() {
     free(jsonString);
 }
 
-void Init(std::string const& romMount) {
+void Init(std::string const &romMount) {
     const char *contents;
     size_t contentsSize;
     Result rc = skyline::utils::readEntireFile(romMount + "system/gamedef.json", (void**)(&contents), &contentsSize);
@@ -129,8 +133,8 @@ cleanup:
 
 template int JsonWrapper::get<int>();
 template size_t JsonWrapper::get<size_t>();
-template char *JsonWrapper::get<char*>();
-template std::vector<char*> JsonWrapper::get<std::vector<char*>>();
+template std::string_view JsonWrapper::get<std::string_view>();
+template std::vector<std::string_view> JsonWrapper::get<std::vector<std::string_view>>();
 template bool JsonWrapper::get<bool>();
 template float JsonWrapper::get<float>();
 

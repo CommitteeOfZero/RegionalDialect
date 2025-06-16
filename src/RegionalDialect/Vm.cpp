@@ -62,7 +62,7 @@ static uintptr_t SlotToPtr(int table, int opcode) {
     return 0;
 }
 
-static void InsertCustomInstruction(const std::string &name) {
+static void InsertCustomInstruction(std::string_view name) {
     if (!rd::config::config["patchdef"]["base"]["customInstructions"].has(name)) return;
 
     auto inst = rd::config::config["patchdef"]["base"]["customInstructions"][name];
@@ -77,12 +77,12 @@ static void InsertCustomInstruction(const std::string &name) {
         **reinterpret_cast<uint32_t**>(address) != inst::Ret().Value()) {   // Not a dummy instruction
         Logging.Log("%s cannot be inserted into slot %02X %02X: "
                     "Possibly overwriting existing instruction!",
-                    name.c_str(), table, opcode);
+                    name.data(), table, opcode);
         return;
     }
 
     rd::mem::Overwrite(address, reinterpret_cast<uintptr_t>(&GetDic));
-    Logging.Log("%s inserted at %02X %02X!", name.c_str(), table, opcode);
+    Logging.Log("%s inserted at %02X %02X!", name.data(), table, opcode);
 }
 
 void CalMain::Callback(ScriptThreadState *param_1, int32_t *param2) {

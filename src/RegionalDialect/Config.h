@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 
 #include <cJSON/cJSON.h>
 #include <lib/log/logger_mgr.hpp>
@@ -27,17 +28,17 @@ namespace config {
             }
         }
         cJSON const* raw() const { return inner; }
-        JsonWrapper operator[](const std::string& item);
+        JsonWrapper operator[](std::string_view item);
 
         template <typename T>
         T get();
-        bool has(const std::string& item);
+        bool has(std::string_view item);
         void print();
     };
 
     inline JsonWrapper config;
 
-    void Init(std::string const& romMount);
+    void Init(std::string const &romMount);
 
 }  // namespace config
 }  // namespace rd

@@ -30,14 +30,14 @@ struct SigExprToken {
 
 class SigExprLexer {
   private:
-    const std::string &input;
+    std::string_view input;
     size_t pos = 0;
     SigExprToken currentToken;
     const static std::map<char, SigExprTokenType> tokenMapping;
   public:
     friend class SigExprParser;
 
-    SigExprLexer(const std::string &input) : input(input), currentToken({ Start, 0 }) {}
+    SigExprLexer(std::string_view input) : input(input), currentToken({ Start, 0 }) {}
 
     SigExprToken getToken() {
         if (currentToken.type == Start) nextToken();
@@ -53,13 +53,13 @@ class SigExprLexer {
         else if ((it = tokenMapping.find(input[pos])) != tokenMapping.end()) { currentToken = { it->second, 0 }; pos++; }
         else if (std::isdigit(input[pos])) {
             char *end;
-            currentToken = { Number, (uintptr_t)std::strtoull(input.c_str() + pos, &end, 0) };
-            pos = end - input.c_str();
-        } else if (pos + 2 < input.size() && strncasecmp(input.c_str() + pos, "ptr", 3) == 0) {
+            currentToken = { Number, (uintptr_t)std::strtoull(input.data() + pos, &end, 0) };
+            pos = end - input.data();
+        } else if (pos + 2 < input.size() && strncasecmp(input.data() + pos, "ptr", 3) == 0) {
             currentToken = { Ptr, 0 };
             pos += 3;
         } else {
-            Logging.Log("Lexing error in '%s' at position %lu: Unexpected character: '%c'", input.c_str(), pos, input[pos]);
+            Logging.Log("Lexing error in '%s' at position %lu: Unexpected character: '%c'", input.data(), pos, input[pos]);
             std::exit(1);
         }
     }
@@ -118,17 +118,17 @@ class SigExprParser {
                 break;
         }
 
-        Logging.Log("Parsing error in '%s': Expected EOL, got %s.\n", lexer.input.c_str(), tokenType.find(lexer.getToken().type)->second.data());
+        Logging.Log("Parsing error in '%s': Expected EOL, got %s.\n", lexer.input.data(), tokenType.find(lexer.getToken().type)->second.data());
         std::exit(1);
     }
 
   public:
-    SigExprParser(const std::string& input, uintptr_t ptr) : lexer(input), ptr(ptr) {}
+    SigExprParser(std::string_view input, uintptr_t ptr) : lexer(input), ptr(ptr) {}
 
     uintptr_t eval() {
         uintptr_t result = expression();
         if (lexer.getToken().type != End) {
-            Logging.Log("Parsing error in '%s': Expected EOL, got %s.\n", lexer.input.c_str(), tokenType.find(lexer.getToken().type)->second.data());
+            Logging.Log("Parsing error in '%s': Expected EOL, got %s.\n", lexer.input.data(), tokenType.find(lexer.getToken().type)->second.data());
             std::exit(1);
         }
         return result;
@@ -229,11 +229,11 @@ static bool MatchByte(const unsigned char byte, const PatternByte& pbyte) {
 }
 
 uintptr_t FindPattern(const unsigned char* dataStart,
-                      const unsigned char* dataEnd, const char* pszPattern,
+                      const unsigned char* dataEnd, std::string_view pszPattern,
                       uintptr_t baseAddress, size_t offset, int occurrence) {
     // Build vectored pattern..
     vector<PatternByte> patterndata;
-    if (!TransformPattern(pszPattern, patterndata)) return 0;
+    if (!TransformPattern(pszPattern.data(), patterndata)) return 0;
 
     // The result count for multiple results..
     int resultCount = 0;
@@ -259,7 +259,7 @@ uintptr_t FindPattern(const unsigned char* dataStart,
     return 0;
 }
 
-uintptr_t SigScanRaw(const char *pattern, size_t offset, int occurrence) {
+uintptr_t SigScanRaw(std::string_view pattern, size_t offset, int occurrence) {
     std::stringstream logstr;
 
     logstr << pattern;
@@ -288,11 +288,11 @@ uintptr_t SigScan(const char* category, const char* sigName) {
     Logging.Log("SigScan: looking for %s/%s...\n", category, sigName);
 
     rd::config::JsonWrapper sig = rd::config::config["gamedef"]["signatures"][category][sigName];
-    uintptr_t raw = SigScanRaw(sig["pattern"].get<char*>(), sig["offset"].get<size_t>(), sig["occurrence"].get<int>());
+    uintptr_t raw = SigScanRaw(sig["pattern"].get<std::string_view>(), sig["offset"].get<size_t>(), sig["occurrence"].get<int>());
     
     if (!sig.has("expr")) return raw;
     if (raw == 0) return raw;
-    return SigExprParser(sig["expr"].get<char*>(), raw).eval();
+    return SigExprParser(sig["expr"].get<std::string_view>(), raw).eval();
 }
 
 std::vector<uintptr_t> SigScanExhaust(const char *category, const char *sigName) {
@@ -308,7 +308,7 @@ std::vector<uintptr_t> SigScanExhaust(const char *category, const char *sigName)
 
     uintptr_t raw;
     int occur = 0;
-    while ((raw = SigScanRaw(sig["pattern"].get<char*>(), 0, occur++)) != 0) {
+    while ((raw = SigScanRaw(sig["pattern"].get<std::string_view>(), 0, occur++)) != 0) {
         ret.push_back(raw);
     }
     
@@ -327,7 +327,7 @@ std::vector<uintptr_t> SigScanArray(const char *category, const char *sigName, b
 
     rd::config::JsonWrapper sig = rd::config::config["gamedef"]["signatures"][category][sigName];
 
-    for (auto pattern : sig["patterns"].get<std::vector<char*>>()) {
+    for (auto pattern : sig["patterns"].get<std::vector<string_view>>()) {
         uintptr_t raw;
         int occur = 0;
         while ((raw = SigScanRaw(pattern, 0, occur++)) != 0) {
