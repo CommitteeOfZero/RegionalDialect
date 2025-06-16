@@ -13,6 +13,8 @@ namespace vm {
 
 using VmInstruction = void (*)(ScriptThreadState*);
 
+// Add custom instruction with the above signature here to add to the insertion pool
+// Needs existing definition to compile
 #define CUSTOM_INST_LIST    \
     CUSTOM_INST(GetDic)
 
@@ -99,6 +101,8 @@ static void InsertCustomInstruction(std::string_view name) {
         return;
     }
 
+    // Can't use .at() due to restrictions on exception-throwing code
+    // Non-throwing workaround, but will never error a runtime due to proper (compile-time) checks
     rd::mem::Overwrite(address, reinterpret_cast<uintptr_t>(CustomInstructions.find(name)->second));
     Logging.Log("%s inserted at %02X %02X!", name.data(), table, opcode);
 }
@@ -114,6 +118,8 @@ void Init() {
 
     HOOK_FUNC(game, CalMain);
 
+    // Making sure function to insert is in the pool (sanity check)
+    // before trying insertion at runtime, but only if requested
     #define CUSTOM_INST(name)                                   \
         [&]{                                                    \
             static_assert(CustomInstructions.contains(#name));  \
