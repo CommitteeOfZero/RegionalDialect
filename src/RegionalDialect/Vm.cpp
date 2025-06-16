@@ -1,6 +1,9 @@
 #include <cstdint>
 #include <concepts>
 
+#include <frozen/unordered_map.h>
+#include <frozen/string.h>
+
 #include "Vm.h"
 #include "System.h"
 #include "Mem.h"
@@ -9,6 +12,21 @@ namespace rd {
 namespace vm {
 
 using VmInstruction = void (*)(ScriptThreadState*);
+
+#define CUSTOM_INST_LIST    \
+    CUSTOM_INST(GetDic)
+
+#define CUSTOM_INST(name)   \
+    void name(ScriptThreadState *);
+CUSTOM_INST_LIST
+#undef CUSTOM_INST
+
+#define CUSTOM_INST(name)   \
+    { #name, &name },
+constexpr static auto CustomInstructions = frozen::make_unordered_map<frozen::string, VmInstruction>({
+    CUSTOM_INST_LIST
+});
+#undef CUSTOM_INST
 
 static VmInstruction *SCRuser1 = nullptr;
 static VmInstruction *SCRgraph = nullptr;
@@ -81,7 +99,7 @@ static void InsertCustomInstruction(std::string_view name) {
         return;
     }
 
-    rd::mem::Overwrite(address, reinterpret_cast<uintptr_t>(&GetDic));
+    rd::mem::Overwrite(address, reinterpret_cast<uintptr_t>(CustomInstructions.find(name)->second));
     Logging.Log("%s inserted at %02X %02X!", name.data(), table, opcode);
 }
 
@@ -96,7 +114,13 @@ void Init() {
 
     HOOK_FUNC(game, CalMain);
 
-    InsertCustomInstruction("GetDic");
+    #define CUSTOM_INST(name)                                   \
+        [&]{                                                    \
+            static_assert(CustomInstructions.contains(#name));  \
+            InsertCustomInstruction(#name);                     \
+        }();
+    CUSTOM_INST_LIST;
+    #undef CUSTOM_INST
 }
 
 }  // namespace vm

@@ -9,16 +9,13 @@
     HOOK_DEFINE_TRAMPOLINE(name) { static ret Callback(__VA_ARGS__); };
 
 #define HOOK_FUNC(category, name)                                                       \
-    do {                                                                                \
-        if (rd::config::config["gamedef"]["signatures"][#category].has(#name)) {        \
-            name::InstallAtPtr(rd::hook::SigScan(#category, #name));                    \
-        }                                                                               \
-    } while (0)
+    [&]{                                                                                \
+        if (!rd::config::config["gamedef"]["signatures"][#category].has(#name)) return; \
+        name::InstallAtPtr(rd::hook::SigScan(#category, #name));                        \
+    }()
 
 #define HOOK_VAR(category, name)                                                        \
-    do {                                                                                \
-        name = reinterpret_cast<decltype(name)>(rd::hook::SigScan(#category, #name));   \
-    } while (0)
+    name = reinterpret_cast<decltype(name)>(rd::hook::SigScan(#category, #name));
 
 namespace rd {
 namespace hook {

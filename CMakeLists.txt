@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.25)
 project(subsdk CXX C ASM)
 
+include(FetchContent)
+
 ## Error if not using switch toolchain file
 if (NOT SWITCH)
   message(FATAL_ERROR "Not targeting switch, make sure to specify -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain.cmake")
@@ -44,6 +46,14 @@ set_target_properties(cJSON PROPERTIES
   C_STANDARD 90
 )
 
+FetchContent_Declare(
+  frozen
+  GIT_REPOSITORY https://github.com/serge-sans-paille/frozen
+  GIT_TAG "1.2.0"
+)
+
+FetchContent_MakeAvailable(frozen)
+
 add_executable(subsdk9 
   ${SOURCES_ASM}
   ${SOURCES_C}
@@ -55,7 +65,7 @@ add_executable(subsdk9
   ${SKYLINE_SOURCES}
 )
 
-target_link_libraries(subsdk9 cJSON)
+target_link_libraries(subsdk9 cJSON frozen)
 
 set_target_properties(subsdk9 PROPERTIES 
 C_STANDARD 17
