@@ -22,6 +22,37 @@ extern "C" {
 namespace rd {
 namespace text {
 
+typedef struct {
+  int lines;
+  int length;
+  int textureStartX[MAX_PROCESSED_STRING_LENGTH];
+  int textureStartY[MAX_PROCESSED_STRING_LENGTH];
+  int textureWidth[MAX_PROCESSED_STRING_LENGTH];
+  int textureHeight[MAX_PROCESSED_STRING_LENGTH];
+  int displayStartX[MAX_PROCESSED_STRING_LENGTH];
+  int displayStartY[MAX_PROCESSED_STRING_LENGTH];
+  int displayEndX[MAX_PROCESSED_STRING_LENGTH];
+  int displayEndY[MAX_PROCESSED_STRING_LENGTH];
+  int color[MAX_PROCESSED_STRING_LENGTH];
+  int glyph[MAX_PROCESSED_STRING_LENGTH];
+  uint8_t linkNumber[MAX_PROCESSED_STRING_LENGTH];
+  int linkCharCount;
+  int linkCount;
+  int curLinkNumber;
+  int curColor;
+  int usedLineLength;
+  bool error;
+  char text[MAX_PROCESSED_STRING_LENGTH];
+} ProcessedSc3String_t;
+
+typedef struct {
+  int8_t* start;
+  int8_t* end;
+  uint16_t cost;
+  bool startsWithSpace;
+  bool endsWithLinebreak;
+} StringWord_t;
+
 static float AtlasDialogueMargin = 0.0f;
 static float AtlasOutlineMargin = 0.0f;
 static float DialogueOutlineOffset = 0.0f;
