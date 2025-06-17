@@ -1,7 +1,9 @@
 #include <cstdint>
-#include <map>
 #include <string>
 #include <sstream>
+
+#include <frozen/unordered_map.h>
+#include <frozen/string.h>
 
 #include <log/logger_mgr.hpp>
 #include <skyline/utils/cpputils.hpp>
@@ -33,7 +35,13 @@ class SigExprLexer {
     std::string_view input;
     size_t pos = 0;
     SigExprToken currentToken;
-    const static std::map<char, SigExprTokenType> tokenMapping;
+    constexpr static auto tokenMapping =
+        frozen::make_unordered_map<char, SigExprTokenType>({
+            { '+', Plus,  }, { '-', Minus  },
+            { '*', Deref  }, { '(', LParen },
+            { ')', RParen }, { ',', Comma  },
+        });
+
   public:
     friend class SigExprParser;
 
@@ -69,7 +77,14 @@ class SigExprParser {
   private:
     SigExprLexer lexer;
     const uintptr_t ptr;
-    const static std::map<SigExprTokenType, std::string_view> tokenType;
+    constexpr static auto tokenType = 
+        frozen::make_unordered_map<SigExprTokenType, frozen::string>({
+            { Start,  "Start"  }, { Plus,   "Plus"   },
+            { Minus,  "Minus"  }, { Deref,  "Deref"  },
+            { LParen, "LParen" }, { RParen, "RParen" },
+            { Comma,  "Comma"  }, { Number, "Number" },
+            { Ptr,    "Ptr"    }, { End,    "End"    }
+        });
 
     uintptr_t expression(bool allowComma = true) {
         uintptr_t result = summand(false, allowComma);
@@ -133,20 +148,6 @@ class SigExprParser {
         }
         return result;
     }
-};
-
-const std::map<char, SigExprTokenType> SigExprLexer::tokenMapping = {
-    { '+', Plus,  }, { '-', Minus  },
-    { '*', Deref  }, { '(', LParen },
-    { ')', RParen }, { ',', Comma  },
-};
-
-const std::map<SigExprTokenType, std::string_view> SigExprParser::tokenType = {
-    { Start,  "Start"  }, { Plus,   "Plus"   },
-    { Minus,  "Minus"  }, { Deref,  "Deref"  },
-    { LParen, "LParen" }, { RParen, "RParen" },
-    { Comma,  "Comma"  }, { Number, "Number" },
-    { Ptr,    "Ptr"    }, { End,    "End"    }
 };
 
 using namespace std;
