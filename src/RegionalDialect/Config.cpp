@@ -59,8 +59,22 @@ template<> std::vector<std::string_view> JsonWrapper::get<std::vector<std::strin
     return ret;
 }
 
+template<> std::vector<JsonWrapper> JsonWrapper::get<std::vector<JsonWrapper>>() {
+    size_t size = (size_t)::cJSON_GetArraySize(inner);
+    auto ret = std::vector<JsonWrapper>();
+    ret.reserve(size);
+
+    for (size_t i = 0; i < size; i++) ret.emplace_back(::cJSON_GetArrayItem(inner, i));
+
+    return ret;
+}
+
 template<> float JsonWrapper::get<float>() {
     return static_cast<float>(::cJSON_GetNumberValue(inner));
+}
+
+std::string_view JsonWrapper::getName() const {
+    return std::string_view { this->inner->string ? this->inner->string : "" };
 }
 
 bool JsonWrapper::has(std::string_view item) {
@@ -137,6 +151,7 @@ template std::string_view JsonWrapper::get<std::string_view>();
 template std::vector<std::string_view> JsonWrapper::get<std::vector<std::string_view>>();
 template bool JsonWrapper::get<bool>();
 template float JsonWrapper::get<float>();
+template std::vector<JsonWrapper> JsonWrapper::get<std::vector<JsonWrapper>>();
 
 }  // namespace config
 }  // namespace rd

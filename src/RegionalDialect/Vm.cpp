@@ -29,6 +29,7 @@ constexpr static auto CustomInstructions = frozen::make_unordered_map<frozen::st
     CUSTOM_INST_LIST
 });
 #undef CUSTOM_INST
+#undef CUSTOM_INST_LIST // Out of scope, less code footprint
 
 static VmInstruction *SCRuser1 = nullptr;
 static VmInstruction *SCRgraph = nullptr;
@@ -82,29 +83,45 @@ static uintptr_t SlotToPtr(int table, int opcode) {
     return 0;
 }
 
-static void InsertCustomInstruction(std::string_view name) {
-    if (!rd::config::config["patchdef"]["base"]["customInstructions"].has(name)) return;
+static void InsertCustomInstructions() {
+    if (!rd::config::config["patchdef"]["base"].has("customInstructions")) return;
 
-    auto inst = rd::config::config["patchdef"]["base"]["customInstructions"][name];
+    auto toInsert =
+        rd::config::config["patchdef"]["base"]["customInstructions"].get<std::vector<rd::config::JsonWrapper>>();
 
-    int table = inst["table"].get<int>();
-    int opcode = inst["opcode"].get<int>();
+    for (auto inst = toInsert.begin(); inst != toInsert.end(); inst++) {
+        const std::string_view name = inst->getName();
 
-    uintptr_t address = SlotToPtr(table, opcode);
-    if (address == 0) return;
+        if (name.empty()) {
+            Logging.Log("Missing instruction name at index '%u'! Skipping...\n", inst - toInsert.begin());
+            continue;
+        }
 
-    if (*reinterpret_cast<uint32_t*>(address) != 0 &&                       // Non-empty slot
-        **reinterpret_cast<uint32_t**>(address) != inst::Ret().Value()) {   // Not a dummy instruction
-        Logging.Log("%s cannot be inserted into slot %02X %02X: "
-                    "Possibly overwriting existing instruction!",
-                    name.data(), table, opcode);
-        return;
+        decltype(CustomInstructions)::const_iterator itr;
+
+        if ((itr = CustomInstructions.find(name)) == CustomInstructions.end()) {
+            Logging.Log("No custom instruction for '%s' exists in the insertion pool! Skipping...\n", name.data());
+            continue;
+        }
+
+        int table = (*inst)["table"].get<int>();
+        int opcode = (*inst)["opcode"].get<int>();
+
+        uintptr_t address = SlotToPtr(table, opcode);
+
+        if (address == 0) continue;
+
+        if (*reinterpret_cast<uint32_t*>(address) != 0 &&                       // Non-empty slot
+            **reinterpret_cast<uint32_t**>(address) != inst::Ret().Value()) {   // Not a dummy instruction
+            Logging.Log("%s cannot be inserted into slot %02X %02X: "
+                        "Possibly overwriting existing instruction!",
+                        itr->first.data(), table, opcode);
+            continue;
+        }
+
+        rd::mem::Overwrite(address, reinterpret_cast<uintptr_t>(itr->second));
+        Logging.Log("%s inserted at %02X %02X!", itr->first.data(), table, opcode);
     }
-
-    // Can't use .at() due to restrictions on exception-throwing code
-    // Non-throwing workaround, but will never error at runtime due to proper (compile-time) checks
-    rd::mem::Overwrite(address, reinterpret_cast<uintptr_t>(CustomInstructions.find(name)->second));
-    Logging.Log("%s inserted at %02X %02X!", name.data(), table, opcode);
 }
 
 void CalMain::Callback(ScriptThreadState *param_1, int32_t *param2) {
@@ -118,15 +135,7 @@ void Init() {
 
     HOOK_FUNC(game, CalMain);
 
-    // Making sure function to insert is in the pool (sanity check)
-    // before trying insertion at runtime, but only if requested
-    #define CUSTOM_INST(name)                                   \
-        [&]{                                                    \
-            static_assert(CustomInstructions.contains(#name));  \
-            InsertCustomInstruction(#name);                     \
-        }();
-    CUSTOM_INST_LIST;
-    #undef CUSTOM_INST
+    InsertCustomInstructions();
 }
 
 }  // namespace vm

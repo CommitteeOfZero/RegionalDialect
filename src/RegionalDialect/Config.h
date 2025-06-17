@@ -33,6 +33,7 @@ namespace config {
         template <typename T>
         T get();
         bool has(std::string_view item);
+        std::string_view getName() const;
         void print();
     };
 
