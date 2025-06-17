@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 #include "Hook.h"
 
 namespace rd {
@@ -25,7 +27,7 @@ struct ScriptThreadState {
   /* 0140 */ ScriptThreadState *next_context;
   /* 0144 */ ScriptThreadState *prev_context;
   /* 0148 */ ScriptThreadState *next_free_context;
-  /* 014C */ void *pc;
+  /* 014C */ std::byte *pc;
 };
 
 DECLARE_HOOK(CalMain, void, ScriptThreadState *param_1, int32_t *param_2);

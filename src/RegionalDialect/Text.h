@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstddef>
+#include <span>
+
 #include "Hook.h"
 
 #define MAX_PROCESSED_STRING_LENGTH 2000

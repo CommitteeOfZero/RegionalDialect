@@ -36,13 +36,13 @@ static VmInstruction *SCRgraph = nullptr;
 static VmInstruction *SCRsystem = nullptr;
 
 static inline void PopOpcode(ScriptThreadState *thread) {
-    thread->pc = reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(thread->pc) + 2);
+    thread->pc += 2;
 }
 
 template <std::integral T>
 [[maybe_unused]] static inline T Pop(ScriptThreadState *thread)  {
-    T ret = *static_cast<T*>(thread->pc);
-    thread->pc = reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(thread->pc) + sizeof(T));
+    T ret = *reinterpret_cast<T*>(thread->pc);
+    thread->pc += sizeof(T);
     return ret;
 }
 

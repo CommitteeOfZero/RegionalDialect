@@ -109,9 +109,9 @@ void semiTokeniseSc3String(int8_t *sc3string, std::list<StringWord_t> &words,
                 word = {++sc3string, NULL, 0, false, false};
                 break;
             case 4:
-                sc3.pc = sc3string + 1;
+                sc3.pc = reinterpret_cast<std::byte*>(sc3string) + 1;
                 rd::vm::CalMain::Callback(&sc3, &sc3evalResult);
-                sc3string = (int8_t *)sc3.pc;
+                sc3string = reinterpret_cast<int8_t*>(sc3.pc);
                 break;
             case 9:
             case 0xB:
@@ -120,7 +120,7 @@ void semiTokeniseSc3String(int8_t *sc3string, std::list<StringWord_t> &words,
                 sc3string++;
                 break;
             default:
-                int glyphId = (uint8_t)sc3string[1] + ((c & 0x7F) << 8);
+                int glyphId = sc3string[1] + ((c & 0x7F) << 8);
                 uint16_t glyphWidth = (baseGlyphSize * ourTable[glyphId]) / 32;
                 if (glyphId == GLYPH_ID_FULLWIDTH_SPACE ||
                     glyphId == GLYPH_ID_HALFWIDTH_SPACE) {
@@ -192,7 +192,7 @@ void processSc3TokenList(int xOffset, int yOffset,int lineLength,
                     goto afterWord;
                     break;
                 case 4:
-                    sc3.pc = sc3string + 1;
+                    sc3.pc = reinterpret_cast<std::byte*>(sc3string) + 1;
                     rd::vm::CalMain::Callback(&sc3, &sc3evalResult);
                     sc3string = (int8_t *)sc3.pc;
                     int scrWorkColor;
@@ -225,7 +225,7 @@ void processSc3TokenList(int xOffset, int yOffset,int lineLength,
                     break;
                 case 0x1E:
                     sc3string++;
-                    [[fallthrough]];
+                    [[ fallthrough ]];
                 case 0x1F:
                     sc3string++;
                     break;
