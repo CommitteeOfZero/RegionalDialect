@@ -19,7 +19,7 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/subsdk9.json "${JSON_CONTENTS}")
 
 ## subsdk9
 set(CMAKE_EXECUTABLE_SUFFIX ".elf")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DISEMU=${ISEMU}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DISEMU=${ISEMU} -Werror=unused-result -Wno-deprecated-literal-operator")
 
 # Project sources
 file(GLOB_RECURSE SKYLINE_SOURCES 

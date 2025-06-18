@@ -3,6 +3,7 @@
 #include <vector>
 #include <functional>
 
+#include <sys/endian.h>
 #include <skyline/utils/cpputils.hpp>
 #include <log/logger_mgr.hpp>
 
@@ -34,7 +35,7 @@ typedef struct {
   int displayEndX[MAX_PROCESSED_STRING_LENGTH];
   int displayEndY[MAX_PROCESSED_STRING_LENGTH];
   int color[MAX_PROCESSED_STRING_LENGTH];
-  int glyph[MAX_PROCESSED_STRING_LENGTH];
+  size_t glyph[MAX_PROCESSED_STRING_LENGTH];
   uint8_t linkNumber[MAX_PROCESSED_STRING_LENGTH];
   int linkCharCount;
   int linkCount;
@@ -46,12 +47,43 @@ typedef struct {
 } ProcessedSc3String_t;
 
 typedef struct {
-  int8_t* start;
-  int8_t* end;
+  std::byte *start;
+  std::byte *end;
   uint16_t cost;
   bool startsWithSpace;
   bool endsWithLinebreak;
 } StringWord_t;
+
+// From https://github.com/CommitteeOfZero/impacto/blob/bfc23774eeeb4bcf853cace270ac3ac58eb681f1/src/text.cpp#L38
+enum class StringTokenType : uint8_t {
+    LineBreak = 0x00,
+    CharacterNameStart = 0x01,
+    DialogueLineStart = 0x02,
+    Present = 0x03,
+    SetColor = 0x04,
+    Present_Clear = 0x08,
+    RubyBaseStart = 0x09,
+    RubyTextStart = 0x0A,
+    RubyTextEnd = 0x0B,
+    SetFontSize = 0x0C,
+    PrintInParallel = 0x0E,
+    CenterText = 0x0F,
+    SetTopMargin = 0x11,
+    SetLeftMargin = 0x12,
+    GetHardcodedValue = 0x13,
+    EvaluateExpression = 0x15,
+    UnlockTip = 0x16,
+    Present_0x18 = 0x18,
+    AutoForward = 0x19,
+    AutoForward_1A = 0x1A,
+    RubyCenterPerCharacter = 0x1E,
+    AltLineBreak = 0x1F,
+
+    // This is our own!
+    Character = 0xFE,
+
+    EndOfString = 0xFF
+};
 
 static float AtlasDialogueMargin = 0.0f;
 static float AtlasOutlineMargin = 0.0f;
@@ -88,8 +120,8 @@ void transformFontAtlasCoordinates(
     if (margin == 0.0f) return;
 
     if (OutlinedFont && fontSurfaceId == OUTLINE_FONT_SURFACE_ID) {
-        for (const auto &coord : std::array<std::reference_wrapper<float>, 4>
-            { pos_x0, pos_x1, pos_y0, pos_y1 })
+        for (const auto &coord : std::to_array<std::reference_wrapper<float>>(
+            { pos_x0, pos_x1, pos_y0, pos_y1 }))
             coord.get() += DialogueOutlineOffset;
     }  
 
@@ -120,53 +152,51 @@ void transformFontAtlasCoordinates(
     uv_w = uv_h = newSize;
 }
 
-void semiTokeniseSc3String(int8_t *sc3string, std::list<StringWord_t> &words,
+void semiTokeniseSc3String(std::byte *sc3String, std::list<StringWord_t> &words,
                            int baseGlyphSize, int lineLength) {
-    rd::vm::ScriptThreadState sc3;
-    int32_t sc3evalResult;
-    StringWord_t word = {sc3string, NULL, 0, false, false};
-    int8_t c;
-    while (sc3string != nullptr) {
-        c = *sc3string;
-        switch (c) {
-            case -1:
-                word.end = sc3string - 1;
-                words.push_back(word);
+    StringWord_t word = { sc3String, NULL, 0, false, false };
+
+    while (sc3String != nullptr) {
+        const StringTokenType type { std::to_integer<uint8_t>(*sc3String) };
+        switch (type) {
+            case StringTokenType::EndOfString:
+                word.end = sc3String - 1;
+                words.emplace_back(word);
                 return;
-            case 0:
-                word.end = sc3string - 1;
+            case StringTokenType::LineBreak:
+                word.end = sc3String - 1;
                 word.endsWithLinebreak = true;
-                words.push_back(word);
-                word = {++sc3string, NULL, 0, false, false};
+                words.emplace_back(word);
+                word = { ++sc3String, NULL, 0, false, false };
                 break;
-            case 4:
-                sc3.pc = reinterpret_cast<std::byte*>(sc3string) + 1;
-                rd::vm::CalMain::Callback(&sc3, &sc3evalResult);
-                sc3string = reinterpret_cast<int8_t*>(sc3.pc);
+            case StringTokenType::SetColor: {
+                rd::vm::ScriptThreadState dummy = { .pc = sc3String + 1 };
+                EXL_UNUSED(rd::vm::PopExpr(&dummy));
+                sc3String = dummy.pc;
                 break;
-            case 9:
-            case 0xB:
-            case 0x1E:
-            case 0x1F:
-                sc3string++;
+            }
+            case StringTokenType::RubyBaseStart:
+            case StringTokenType::RubyTextEnd:
+            case StringTokenType::RubyCenterPerCharacter:
+            case StringTokenType::AltLineBreak:
+                sc3String++;
                 break;
             default:
-                int glyphId = sc3string[1] + ((c & 0x7F) << 8);
+                size_t glyphId = be16dec(sc3String) & 0x7FFF;
                 uint16_t glyphWidth = (baseGlyphSize * ourTable[glyphId]) / 32;
-                if (glyphId == GLYPH_ID_FULLWIDTH_SPACE ||
-                    glyphId == GLYPH_ID_HALFWIDTH_SPACE) {
-                    word.end = sc3string - 1;
-                    words.push_back(word);
-                    word = {sc3string, NULL, glyphWidth, true, false};
+                if (glyphId == GLYPH_ID_FULLWIDTH_SPACE || glyphId == GLYPH_ID_HALFWIDTH_SPACE) {
+                    word.end = sc3String - 1;
+                    words.emplace_back(word);
+                    word = {sc3String, NULL, glyphWidth, true, false};
                 } else {
                     if (word.cost + glyphWidth > lineLength) {
-                        word.end = sc3string - 1;
-                        words.push_back(word);
-                        word = {sc3string, NULL, 0, false, false};
+                        word.end = sc3String - 1;
+                        words.emplace_back(word);
+                        word = {sc3String, NULL, 0, false, false};
                     }
                     word.cost += glyphWidth;
                 }
-                sc3string += 2;
+                sc3String += 2;
                 break;
         }
     }
@@ -178,9 +208,6 @@ void processSc3TokenList(int xOffset, int yOffset,int lineLength,
                         bool measureOnly, float multiplier,
                         int lastLinkNumber, int curLinkNumber,
                         int currentColor, int lineHeight) {
-
-    rd::vm::ScriptThreadState sc3;
-    int32_t sc3evalResult;
 
     ::memset(result, 0, sizeof(ProcessedSc3String_t));
 
@@ -194,12 +221,9 @@ void processSc3TokenList(int xOffset, int yOffset,int lineLength,
             words.erase(words.begin(), it);
             break;
         }
-        int wordCost =
-            it->cost -
-            ((curLineLength == 0 && it->startsWithSpace == true) ? spaceCost : 0);
+        int wordCost = it->cost - spaceCost * (int)(!curLineLength && it->startsWithSpace);
         if (curLineLength + wordCost > lineLength) {
-            if (curLineLength != 0 && it->startsWithSpace == true)
-                wordCost -= spaceCost;
+            wordCost -= spaceCost * (int)(curLineLength && it->startsWithSpace);
             result->lines++;
             prevLineLength = curLineLength;
             curLineLength = 0;
@@ -209,59 +233,46 @@ void processSc3TokenList(int xOffset, int yOffset,int lineLength,
             break;
         };
 
-        int8_t c;
-        int8_t *sc3string = (curLineLength == 0 && it->startsWithSpace == true)
-                            ? it->start + 2
-                            : it->start;
-        while (sc3string <= it->end) {
-            c = *sc3string;
+        std::byte *sc3String = it->start + (int)(!curLineLength && it->startsWithSpace) * 2;
+
+        while (sc3String <= it->end) {
+            StringTokenType c { std::to_integer<uint8_t>(*sc3String) };
             switch (c) {
-                case -1:
+                case StringTokenType::EndOfString:
                     goto afterWord;
                     break;
-                case 0:
+                case StringTokenType::LineBreak:
                     goto afterWord;
                     break;
-                case 4:
-                    sc3.pc = reinterpret_cast<std::byte*>(sc3string) + 1;
-                    rd::vm::CalMain::Callback(&sc3, &sc3evalResult);
-                    sc3string = (int8_t *)sc3.pc;
-                    int scrWorkColor;
+                case StringTokenType::SetColor: {
+                    rd::vm::ScriptThreadState dummy = { .pc = sc3String + 1 };
+                    auto colorIndex = rd::vm::PopExpr(&dummy);
+                    sc3String = dummy.pc;
 
-                    if (sc3evalResult == 255) {
-                        scrWorkColor = rd::sys::ScrWork[2166];
-                        sc3evalResult = scrWorkColor;
-                    }
-                    if (sc3evalResult == 254) {
-                        scrWorkColor = rd::sys::ScrWork[2167];
-                        sc3evalResult = scrWorkColor;
-                    }
-                    if (sc3evalResult == 253) {
-                        scrWorkColor = rd::sys::ScrWork[2168];
-                        sc3evalResult = scrWorkColor;
-                    }
+                    if (colorIndex >= 253 && colorIndex <= 255)
+                        colorIndex = rd::sys::ScrWork[2166 + (255 - colorIndex)];
 
-                    if (color)
-                        currentColor = MesFontColor[2 * sc3evalResult];
-                    else
-                        currentColor = MesFontColor[2 * sc3evalResult + 1];
+                    currentColor = color ?
+                        MesFontColor[colorIndex].textColor :
+                        MesFontColor[colorIndex].outlineColor;
                     break;
-                case 9:
+                }
+                case StringTokenType::RubyBaseStart:
                     curLinkNumber = ++lastLinkNumber;
-                    sc3string++;
+                    sc3String++;
                     break;
-                case 0xB:
+                case StringTokenType::RubyTextEnd:
                     curLinkNumber = NOT_A_LINK;
-                    sc3string++;
+                    sc3String++;
                     break;
-                case 0x1E:
-                    sc3string++;
+                case StringTokenType::RubyCenterPerCharacter:
+                    sc3String++;
                     [[ fallthrough ]];
-                case 0x1F:
-                    sc3string++;
+                case StringTokenType::AltLineBreak:
+                    sc3String++;
                     break;
-                default:
-                    int glyphId = (uint8_t)sc3string[1] + ((c & 0x7F) << 8);
+                default: {
+                    size_t glyphId = be16dec(sc3String) & 0x7FFF;
                     int i = result->length;
                     if (result->lines >= lineCount) break;
                     if (curLinkNumber != NOT_A_LINK) {
@@ -289,8 +300,9 @@ void processSc3TokenList(int xOffset, int yOffset,int lineLength,
                         result->color[i] = currentColor;
                     }
                     result->length++;
-                    sc3string += 2;
+                    sc3String += 2;
                     break;
+                }
             }
         }
     afterWord:
@@ -517,7 +529,7 @@ void MESsetNGflag::Callback(int nameNewline, int rubyEnabled) {
 }
 
 
-int ChatLayout::Callback(uint a1, int8_t *a2, uint a3) {
+int ChatLayout::Callback(uint a1, std::byte *a2, uint a3) {
     ProcessedSc3String_t str;
     std::list<StringWord_t> words;
 
@@ -531,13 +543,13 @@ int ChatLayout::Callback(uint a1, int8_t *a2, uint a3) {
 }
 
 void ChatRendering::Callback(int64_t a1, float a2, float a3, float a4,
-                         int8_t* a5, unsigned int a6, unsigned int a7,
+                         std::byte* a5, unsigned int a6, unsigned int a7,
                          float a8, float a9, unsigned int a11) {
 
     if (a7 == 0x808080 && a8 == 18) return;
     ProcessedSc3String_t str;
     std::list<StringWord_t> words;
-    a11 *= 1.75;
+    a11 *= 1.75f;
     float glyphSize = a8 * 1.1f;
 
     semiTokeniseSc3String(a5, words, glyphSize, a4);

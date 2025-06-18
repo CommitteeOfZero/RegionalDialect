@@ -35,28 +35,11 @@ static VmInstruction *SCRuser1 = nullptr;
 static VmInstruction *SCRgraph = nullptr;
 static VmInstruction *SCRsystem = nullptr;
 
-static inline void PopOpcode(ScriptThreadState *thread) {
-    thread->pc += 2;
-}
-
-template <std::integral T>
-[[maybe_unused]] static inline T Pop(ScriptThreadState *thread)  {
-    T ret = *reinterpret_cast<T*>(thread->pc);
-    thread->pc += sizeof(T);
-    return ret;
-}
-
-static inline int32_t PopExpr(ScriptThreadState *thread) {
-    int32_t ret;
-    CalMain::Callback(thread, &ret);
-    return ret;
-}
-
 void GetDic(ScriptThreadState *thread) {
     PopOpcode(thread);
     
     // For parity with PC
-    Pop<uint8_t>(thread);
+    EXL_UNUSED(Pop<uint8_t>(thread));
 
     auto tipId = PopExpr(thread);
     auto outFlag = PopExpr(thread);
@@ -137,6 +120,5 @@ void Init() {
 
     InsertCustomInstructions();
 }
-
 }  // namespace vm
 }  // namespace rd

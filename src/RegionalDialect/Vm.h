@@ -32,6 +32,23 @@ struct ScriptThreadState {
 
 DECLARE_HOOK(CalMain, void, ScriptThreadState *param_1, int32_t *param_2);
 
+inline void PopOpcode(ScriptThreadState *thread) {
+    thread->pc += 2;
+}
+
+template <std::integral T>
+[[ nodiscard ]] inline T Pop(ScriptThreadState *thread)  {
+    T ret = *reinterpret_cast<T*>(thread->pc);
+    thread->pc += sizeof(T);
+    return ret;
+}
+
+[[ nodiscard ]] inline int32_t PopExpr(ScriptThreadState *thread) {
+    int32_t ret;
+    CalMain::Callback(thread, &ret);
+    return ret;
+}
+
 void Init();
 
 }  // namespace vm

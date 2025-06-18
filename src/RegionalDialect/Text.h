@@ -1,17 +1,21 @@
 #pragma once
 
 #include <cstddef>
-#include <span>
 
 #include "Hook.h"
 
 #define MAX_PROCESSED_STRING_LENGTH 2000
-#define GLYPH_ID_FULLWIDTH_SPACE 0
-#define GLYPH_ID_HALFWIDTH_SPACE 63
+#define GLYPH_ID_FULLWIDTH_SPACE 63
+#define GLYPH_ID_HALFWIDTH_SPACE 0
 #define NOT_A_LINK 0xFF
 
 namespace rd {
 namespace text {
+
+struct MesFontColor_t {
+    uint32_t textColor;
+    uint32_t outlineColor;
+};
 
 inline uint *MesNameDispLen = nullptr;
 inline uint32_t *EPmaxPtr = nullptr;
@@ -22,7 +26,7 @@ inline uint8_t *MEStextFl = nullptr;
 inline unsigned short *MEStext = nullptr;
 inline unsigned short *MESngFontListLast = nullptr;
 inline unsigned short *MESngFontListTop = nullptr;
-inline uint8_t *MesFontColor = nullptr;
+inline MesFontColor_t *MesFontColor = nullptr;
 inline uint32_t *MESrevLineBufUsePtr = nullptr;
 inline uint32_t *MESrevDispLinePos = nullptr;
 inline uint32_t *MESrevLineBufp = nullptr;
@@ -57,11 +61,11 @@ DECLARE_HOOK(TipsDataInit, void, ulong thread, unsigned short *addr1, unsigned s
 
 DECLARE_HOOK(MESsetNGflag, void, int nameNewline, int rubyEnabled);
 
-DECLARE_HOOK(ChatLayout, int, uint a1, int8_t *a2, uint a3);
+DECLARE_HOOK(ChatLayout, int, uint a1, std::byte *a2, uint a3);
 
 DECLARE_HOOK(ChatRendering, void,
             int64_t a1, float a2, float a3, float a4,
-            int8_t* a5, unsigned int a6, unsigned int a7,
+            std::byte *a5, unsigned int a6, unsigned int a7,
             float a8, float a9, unsigned int a11);
 
 DECLARE_HOOK(MESdrawTextExF, void,
