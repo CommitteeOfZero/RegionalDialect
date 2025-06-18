@@ -1,7 +1,8 @@
-#include <math.h>
+#include <cmath>
 #include <list>
 #include <vector>
 #include <functional>
+#include <algorithm>
 
 #include <sys/endian.h>
 #include <skyline/utils/cpputils.hpp>
@@ -55,34 +56,36 @@ typedef struct {
 } StringWord_t;
 
 // From https://github.com/CommitteeOfZero/impacto/blob/bfc23774eeeb4bcf853cace270ac3ac58eb681f1/src/text.cpp#L38
-enum class StringTokenType : uint8_t {
-    LineBreak = 0x00,
-    CharacterNameStart = 0x01,
-    DialogueLineStart = 0x02,
-    Present = 0x03,
-    SetColor = 0x04,
-    Present_Clear = 0x08,
-    RubyBaseStart = 0x09,
-    RubyTextStart = 0x0A,
-    RubyTextEnd = 0x0B,
-    SetFontSize = 0x0C,
-    PrintInParallel = 0x0E,
-    CenterText = 0x0F,
-    SetTopMargin = 0x11,
-    SetLeftMargin = 0x12,
-    GetHardcodedValue = 0x13,
-    EvaluateExpression = 0x15,
-    UnlockTip = 0x16,
-    Present_0x18 = 0x18,
-    AutoForward = 0x19,
-    AutoForward_1A = 0x1A,
-    RubyCenterPerCharacter = 0x1E,
-    AltLineBreak = 0x1F,
+struct StringTokenType {
+    enum value : uint8_t {
+        LineBreak = 0x00,
+        CharacterNameStart = 0x01,
+        DialogueLineStart = 0x02,
+        Present = 0x03,
+        SetColor = 0x04,
+        Present_Clear = 0x08,
+        RubyBaseStart = 0x09,
+        RubyTextStart = 0x0A,
+        RubyTextEnd = 0x0B,
+        SetFontSize = 0x0C,
+        PrintInParallel = 0x0E,
+        CenterText = 0x0F,
+        SetTopMargin = 0x11,
+        SetLeftMargin = 0x12,
+        GetHardcodedValue = 0x13,
+        EvaluateExpression = 0x15,
+        UnlockTip = 0x16,
+        Present_0x18 = 0x18,
+        AutoForward = 0x19,
+        AutoForward_1A = 0x1A,
+        RubyCenterPerCharacter = 0x1E,
+        AltLineBreak = 0x1F,
 
-    // This is our own!
-    Character = 0xFE,
+        // This is our own!
+        Character = 0xFE,
 
-    EndOfString = 0xFF
+        EndOfString = 0xFF
+    };
 };
 
 static float AtlasDialogueMargin = 0.0f;
@@ -157,8 +160,7 @@ void semiTokeniseSc3String(std::byte *sc3String, std::list<StringWord_t> &words,
     StringWord_t word = { sc3String, NULL, 0, false, false };
 
     while (sc3String != nullptr) {
-        const StringTokenType type { std::to_integer<uint8_t>(*sc3String) };
-        switch (type) {
+        switch (std::to_integer<std::underlying_type_t<StringTokenType::value>>(*sc3String)) {
             case StringTokenType::EndOfString:
                 word.end = sc3String - 1;
                 words.emplace_back(word);
@@ -236,8 +238,7 @@ void processSc3TokenList(int xOffset, int yOffset,int lineLength,
         std::byte *sc3String = it->start + (int)(!curLineLength && it->startsWithSpace) * 2;
 
         while (sc3String <= it->end) {
-            StringTokenType c { std::to_integer<uint8_t>(*sc3String) };
-            switch (c) {
+            switch (std::to_integer<std::underlying_type_t<StringTokenType::value>>(*sc3String)) {
                 case StringTokenType::EndOfString:
                     goto afterWord;
                     break;
@@ -414,28 +415,24 @@ void TipsDataInit::Callback(ulong thread, unsigned short *addr1, unsigned short 
     rd::mem::Overwrite(patchInCmp2Addr + 8,   inst::CmpImmediate(reg::W8, *EPmaxPtr - 5).Value());
 }
 
-void MESsetNGflag::Callback(int nameNewline, int rubyEnabled) {
-    auto isNGtop = [](unsigned short glyph)->bool {
-        for (uint32_t i = 0; i < *MESngFontListTopNumPtr; i++) {
-            if (MESngFontListTop[i] == glyph)
-                    return true;
-        }
-        return false;
+void MESsetNGflag::Callback(bool nameNewline, bool rubyEnabled) {
+
+    const auto isNGFunc = [](uint16_t *ptr, uint32_t length) {
+        return [ptr, length](unsigned short glyph)->bool {
+            return std::find(ptr, ptr + length, glyph) != ptr + length;
+        };
     };
 
-    auto isNGlast = [](unsigned short glyph)->bool {
-        for (uint32_t i = 0; i < *MESngFontListLastNumPtr; i++) {
-            if (MESngFontListLast[i] == glyph)
-                return true;
-        }
-        return false;
+    const auto isNGTop = isNGFunc(MESngFontListTop, *MESngFontListTopNumPtr);
+
+    const auto isNGLast = isNGFunc(MESngFontListLast, *MESngFontListLastNumPtr);
+
+
+    const auto isLetter = [&isNGTop, &isNGLast](unsigned short glyph)->bool {
+        return static_cast<int16_t>(glyph) > 0 && !isNGTop(glyph) && !isNGLast(glyph);
     };
 
-    auto isLetter = [&isNGtop, &isNGlast](unsigned short glyph)->bool {
-        return glyph < 0x8000 && !isNGtop(glyph) && !isNGlast(glyph);
-    };
-
-    auto nextWord = [&isLetter](uint32_t &pos)->void {
+    const auto nextWord = [&isLetter](uint32_t &pos)->void {
         int wordLen = 0;
         while (pos < *MEStextDatNumPtr && isLetter(MEStext[pos])) {
             MEStextFl[pos] = wordLen == 0 ? 0x0A : 0x0B;
@@ -444,87 +441,79 @@ void MESsetNGflag::Callback(int nameNewline, int rubyEnabled) {
         MEStextFl[pos - 1] = wordLen == 1 ? 0x00 : 0x09;
     };
 
-	int processingRuby = 0;
-	int processingRubyText = 0;
+    bool processingRuby = false;
+    bool processingRubyText = false;
     uint32_t pos = 0;
 
-    const uint16_t nameStart = 0x8001;
-    const uint16_t nameEnd = 0x8002;
-
-    if (MEStext[0] == nameStart) {
+    if ((MEStext[0] & 0xFF) == StringTokenType::CharacterNameStart) {
         MEStextFl[pos++] = 0x02;
-        while (MEStext[pos] != nameEnd) {
-            MEStextFl[pos] = 0x0B;
-            pos++;
-        }
+        while ((MEStext[pos] & 0xFF) != StringTokenType::DialogueLineStart)
+            MEStextFl[pos++] = 0x0B;
         MEStextFl[pos++] = nameNewline ? 0x07 : 0x01;
     }
 
-	while (pos < *MEStextDatNumPtr) {
-		unsigned short glyph = MEStext[pos];
+    while (pos < *MEStextDatNumPtr) {
+        uint16_t glyph = MEStext[pos];
 
-		MEStextFl[pos] = 0;
+        MEStextFl[pos] = 0;
 
-		if (glyph & 0x8000) {
-			switch (glyph & 0xff) {
-				case 0x00:
-					MEStextFl[pos] = 0x07;
-					break;
-				case 0x09:
-					processingRuby = rubyEnabled;
-					MEStextFl[pos] = 0x02;
-					break;
-				case 0x0a:
-					processingRubyText = rubyEnabled;
+        if (glyph & 0x8000) {
+            switch (glyph & 0xFF) {
+                case StringTokenType::LineBreak:
+                    MEStextFl[pos] = 0x07;
+                    break;
+                case StringTokenType::RubyBaseStart:
+                    processingRuby = rubyEnabled;
+                    MEStextFl[pos] = 0x02;
+                    break;
+                case StringTokenType::RubyTextStart:
+                    processingRubyText = rubyEnabled;
                     MEStextFl[pos] = 0x0B;
-					break;
-				case 0x0b:
-					processingRuby = 0;
-					processingRubyText = 0;
-					MEStextFl[pos] = 0x01;
-					break;
-				case 0x12:
-					MEStextFl[pos] = 0x02;
-					break;
-				case 0x1e:
-					MEStextFl[pos] = 0x0B;
-					break;
-			}
+                    break;
+                case StringTokenType::RubyTextEnd:
+                    processingRuby = processingRubyText = false;
+                    MEStextFl[pos] = 0x01;
+                    break;
+                case StringTokenType::SetLeftMargin:
+                    MEStextFl[pos] = 0x02;
+                    break;
+                case StringTokenType::RubyCenterPerCharacter:
+                    MEStextFl[pos] = 0x0B;
+                    break;
+                default:
+                    break;
+            }
             pos++;
             continue;
-		}
+        }
 
-		if (processingRubyText) {
-			MEStextFl[pos] = 0x1B;
-			pos++;
-		} else if (processingRuby) {
-			MEStextFl[pos] = 0x0b;
-			pos++;
-		} else if (isNGtop(glyph) && isNGlast(glyph)) {
-            MEStextFl[pos] = 0x01 | 0x02;
+        if (processingRubyText || processingRuby) {
+            // processingRubyText -> 0x1B
+            // processingRuby -> 0x0B
+            MEStextFl[pos] = 0x0B | (processingRubyText << 4);
             pos++;
-        } else if (isNGtop(glyph)) {
-            MEStextFl[pos] = 0x01;
-            pos++;
-        } else if (isNGlast(glyph)) {
-            MEStextFl[pos] = 0x02;
+        } else if (uint8_t topLast = isNGTop(glyph) | (isNGLast(glyph) << 1)) {
+            // NG top  -> 0x01
+            // NG last -> 0x02
+            // NG both -> 0x03
+            MEStextFl[pos] = topLast;
             pos++;
         } else {
             nextWord(pos);
         }
-	}
-
-    int lastLetter = 0;
-
-    for (uint32_t i = 0; i < *MEStextDatNumPtr; i++) {
-        if (MEStextFl[i] == 0x0B || MEStextFl[i] == 0x09) {
-            lastLetter = i;
-        }
     }
+
+    uint32_t lastLetter = 0;
+
+    for (uint32_t i = *MEStextDatNumPtr - 1; i >= 0; i--) {
+        if (MEStextFl[i] != 0x0B && MEStextFl[i] != 0x09) continue;
+        lastLetter = i;
+        break;
+    }
+
     for (uint32_t i = lastLetter; i < *MEStextDatNumPtr; i++) {
-        if (MEStextFl[i] != 0x07) {
-            MEStextFl[i] = 0x0B;
-        }
+        if (MEStextFl[i] == 0x07) continue;
+        MEStextFl[i] = 0x0B;
     }
 }
 

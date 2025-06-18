@@ -59,7 +59,7 @@ DECLARE_HOOK(GSLfontStretchWithMaskExF, int,
 
 DECLARE_HOOK(TipsDataInit, void, ulong thread, unsigned short *addr1, unsigned short *addr2);
 
-DECLARE_HOOK(MESsetNGflag, void, int nameNewline, int rubyEnabled);
+DECLARE_HOOK(MESsetNGflag, void, bool nameNewline, bool rubyEnabled);
 
 DECLARE_HOOK(ChatLayout, int, uint a1, std::byte *a2, uint a3);
 
