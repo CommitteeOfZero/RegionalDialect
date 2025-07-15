@@ -37,6 +37,8 @@ DECLARE_HOOK(SSEplay, void, int param_1, int param_2);
 
 DECLARE_HOOK(ChkViewDic, bool, uint param_1, uint param_2);
 
+DECLARE_HOOK(OptionDefault, void, void);
+
 void Init();
 
 }  // namespace sys

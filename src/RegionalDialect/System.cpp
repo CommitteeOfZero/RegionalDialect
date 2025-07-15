@@ -15,7 +15,7 @@ enum class NametagOptionLayoutImpl {
 std::optional<NametagOptionLayoutImpl> NametagOptionLayoutFromString(std::string_view from) {
     if (from == "chneng") return NametagOptionLayoutImpl::CHNENG;
     if (from == "chnjpn") return NametagOptionLayoutImpl::CHNJPN;
-    return {};
+    return std::nullopt;
 }
 
 static auto NametagOptionLayout = std::optional<NametagOptionLayoutImpl>();
@@ -132,10 +132,10 @@ void SSEplay::Callback(int param_1, int param_2 = 0xFFFFFFFF) {
 }
 
 void OptionMain::Callback(void) {
-    if (*OPTmenuModePtr != 2 || OPTmenuCur[*OPTmenuPagePtr] != 3) {
+    if (*OPTmenuModePtr != 2 || *OPTmenuPagePtr != 1 || OPTmenuCur[*OPTmenuPagePtr] != 3) {
         Orig();
         
-        if (*OPTmenuModePtr == 2 && OPTmenuCur[*OPTmenuPagePtr] == 3) NPToggleSel = (ToggleSel)GetFlag::Callback(801);
+        if (*OPTmenuModePtr == 2 && *OPTmenuPagePtr == 1 && OPTmenuCur[*OPTmenuPagePtr] == 3) NPToggleSel = (ToggleSel)GetFlag::Callback(801);
         return;
     }
     
@@ -161,6 +161,15 @@ void OptionMain::Callback(void) {
         SSEplay::Callback(3);
         *OPTmenuModePtr = 1; 
     }
+}
+
+void OptionDefault::Callback(void) {
+    // Not in text settings, nothing to do
+    // (Resetting options to default only applies to the current page)
+    if (*OPTmenuPagePtr != 1) return;
+
+    NPToggleSel = ToggleSel::OFF;
+    SetFlag::Callback(801, false);
 }
 
 bool ChkViewDic::Callback(uint param_1, uint param_2) {
@@ -222,6 +231,7 @@ void Init() {
         HOOK_FUNC(game, SpeakerDrawingFunction);
         HOOK_FUNC(game, OptionDispChip2);
         HOOK_FUNC(game, OptionMain);
+        HOOK_FUNC(game, OptionDefault);
     }
 
     HOOK_FUNC(game, SSEvolume);
