@@ -211,7 +211,7 @@ void Init() {
         rd::mem::Overwrite(rd::hook::SigScan("game", "DoZSelection2"), inst::Branch(-320).Value());
     
     if (rd::config::config["gamedef"]["signatures"]["game"].has("ShortcutMenuFix"))
-        rd::mem::Overwrite(rd::hook::SigScan("game", "ShorcutMenuFix"), inst::Movz(reg::W0, 0x370).Value());
+        rd::mem::Overwrite(rd::hook::SigScan("game", "ShortcutMenuFix"), inst::Movz(reg::W0, 0x370).Value());
 
     HOOK_FUNC(game, GSLflatRectF);
     HOOK_FUNC(game, SetFlag);
