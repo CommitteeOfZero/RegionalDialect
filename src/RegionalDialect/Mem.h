@@ -15,6 +15,12 @@ namespace mem {
 template <typename T>
 inline void Overwrite(uintptr_t address, const T &value) {
     static_assert(std::is_trivially_copyable_v<T>, "Type must be trivially copyable!");
+
+    if (address == 0) [[ unlikely ]] {
+        Logging.Log("Null pointer passed to rd::mem::Overwrite. Ignoring...\n");
+        return;
+    }
+
     exl::util::RwPages control(address, sizeof(T));
     ::memcpy(reinterpret_cast<void*>(control.GetRw()), &value, sizeof(T));
     control.Flush();
