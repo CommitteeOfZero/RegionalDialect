@@ -505,10 +505,9 @@ void MESsetNGflag::Callback(bool nameNewline, bool rubyEnabled) {
 
     uint32_t lastLetter = 0;
 
-    for (uint32_t i = *MEStextDatNumPtr - 1; i >= 0; i--) {
+    for (uint32_t i = 0; i < *MEStextDatNumPtr; i++) {
         if (MEStextFl[i] != 0x0B && MEStextFl[i] != 0x09) continue;
         lastLetter = i;
-        break;
     }
 
     for (uint32_t i = lastLetter; i < *MEStextDatNumPtr; i++) {
