@@ -99,7 +99,7 @@ void OptionDispChip2::Callback(uint param_1) {
             break;
         } 
         case NametagOptionLayoutImpl::CHNENG: {
-        // Nametag option text
+            // Nametag option text
             GSLflatRectF::Callback(152, (int)selecting * 577.0f, 2959.0f, 147.0f, 35.0f, 242.0f, 602.0f, 0xFFFFFF, param_1, 1);
             // Divider
             GSLflatRectF::Callback(152, 0.0f, 1346.0f, 1443.0f, 6.0f, 238.0f, 643.0f, 0xFFFFFF, param_1, 1);
@@ -164,6 +164,8 @@ void OptionMain::Callback(void) {
 }
 
 void OptionDefault::Callback(void) {
+    Orig();
+    
     // Not in text settings, nothing to do
     // (Resetting options to default only applies to the current page)
     if (*OPTmenuPagePtr != 1) return;
