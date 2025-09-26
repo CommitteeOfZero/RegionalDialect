@@ -12,6 +12,7 @@ namespace rd {
 namespace vm {
 
 using VmInstruction = void (*)(ScriptThreadState*);
+using VmInstructionTable = VmInstruction *;
 
 // Add custom instruction with the above signature here to add to the insertion pool
 // Needs existing definition to compile
@@ -31,9 +32,9 @@ constexpr static auto CustomInstructions = frozen::make_unordered_map<frozen::st
 #undef CUSTOM_INST
 #undef CUSTOM_INST_LIST // Out of scope, less code footprint
 
-static VmInstruction *SCRuser1 = nullptr;
-static VmInstruction *SCRgraph = nullptr;
-static VmInstruction *SCRsystem = nullptr;
+static VmInstructionTable SCRuser1 = nullptr;
+static VmInstructionTable SCRgraph = nullptr;
+static VmInstructionTable SCRsystem = nullptr;
 
 void GetDic(ScriptThreadState *thread) {
     PopOpcode(thread);
@@ -59,7 +60,6 @@ static uintptr_t SlotToPtr(int table, int opcode) {
             if (SCRuser1 == nullptr) break;
             return reinterpret_cast<uintptr_t>(&SCRuser1[opcode]);
         default:
-            Logging.Log("Table number 0x%02X is invalid!\n", table);
             break;
     }
 
@@ -92,7 +92,10 @@ static void InsertCustomInstructions() {
 
         uintptr_t address = SlotToPtr(table, opcode);
 
-        if (address == 0) continue;
+        if (address == 0) {
+            Logging.Log("No address available for table number 0x%02X! Skipping...\n", table);
+            continue;
+        };
 
         if (*reinterpret_cast<uint32_t*>(address) != 0 &&                       // Non-empty slot
             **reinterpret_cast<uint32_t**>(address) != inst::Ret().Value()) {   // Not a dummy instruction
