@@ -97,6 +97,8 @@ static int CurrentShadowFont = DIALOGUE_FONT_SURFACE_ID;
 
 static bool NametagImplementation = false;
 
+static bool AddBacklogOutline = false;
+
 void transformFontAtlasCoordinates(
     int &fontSurfaceId, uint &color,
     float& uv_x, float& uv_y, float& uv_w, float& uv_h,
@@ -358,6 +360,23 @@ int GSLfontStretchWithMaskF::Callback(
     float pos_x0, float pos_y0, float pos_x1, float pos_y1,
     uint color, int opacity
 ) {
+    
+    if (AddBacklogOutline && fontSurfaceId == DIALOGUE_FONT_SURFACE_ID && maskSurfaceId == 155) {
+        CurrentShadowFont = OUTLINE_FONT_SURFACE_ID;
+        float tmp = DialogueOutlineOffset;
+        DialogueOutlineOffset = 0.0f;
+
+        GSLfontStretchWithMaskF::Callback(
+            OUTLINE_FONT_SURFACE_ID, maskSurfaceId,
+            uv_x, uv_y, uv_w, uv_h,
+            pos_x0, pos_y0, pos_x1, pos_y1,
+            0x00000000, opacity
+        );
+        
+        DialogueOutlineOffset = tmp;
+        CurrentShadowFont = DIALOGUE_FONT_SURFACE_ID;
+    }
+    
     transformFontAtlasCoordinates(
         fontSurfaceId, color,
         uv_x, uv_y, uv_w, uv_h,
@@ -748,6 +767,10 @@ void Init(std::string const &romMount) {
         NametagImplementation = true;
         HOOK_FUNC(game, MESrevDispInit);
         HOOK_FUNC(game, MESrevDispText);
+    }
+
+    if (rd::config::config["patchdef"]["base"]["addBacklogOutline"].get<bool>()) {
+        AddBacklogOutline = true;
     }
 }
 
