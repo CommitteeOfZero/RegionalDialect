@@ -361,27 +361,23 @@ int GSLfontStretchWithMaskF::Callback(
     uint color, int opacity
 ) {
     
-    if (AddBacklogOutline && fontSurfaceId == DIALOGUE_FONT_SURFACE_ID && maskSurfaceId == 155) {
-        CurrentShadowFont = OUTLINE_FONT_SURFACE_ID;
-        float tmp = DialogueOutlineOffset;
-        DialogueOutlineOffset = 0.0f;
-
-        GSLfontStretchWithMaskF::Callback(
-            OUTLINE_FONT_SURFACE_ID, maskSurfaceId,
-            uv_x, uv_y, uv_w, uv_h,
-            pos_x0, pos_y0, pos_x1, pos_y1,
-            0x00000000, opacity
-        );
-        
-        DialogueOutlineOffset = tmp;
-        CurrentShadowFont = DIALOGUE_FONT_SURFACE_ID;
-    }
-    
     transformFontAtlasCoordinates(
         fontSurfaceId, color,
         uv_x, uv_y, uv_w, uv_h,
         pos_x0, pos_y0, pos_x1, pos_y1
     );
+
+    if (AddBacklogOutline && fontSurfaceId == DIALOGUE_FONT_SURFACE_ID && maskSurfaceId == 155) {
+        static float offset = 1.5f;
+        Orig(
+            fontSurfaceId, maskSurfaceId,
+            uv_x, uv_y, uv_w, uv_h,
+            pos_x0 + offset, pos_y0 + offset,
+            pos_x1 + offset, pos_y1 + offset,
+            0x00000000, opacity
+        );
+    }
+    
 
     return Orig(
         fontSurfaceId, maskSurfaceId,
